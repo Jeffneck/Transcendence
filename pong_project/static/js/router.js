@@ -38,11 +38,12 @@ export function initializeRouter() {
 }
 
 export function navigateTo(route) {
-    ////console.log(`Navigation vers ${route}`);
+    console.log(`Navigation vers ${route}`);
+    console.log(` websocket state ${window.currentGameSocket}`);
 
     //fermer le socket si une session de jeu est en cours 
     if (window.currentGameSocket && window.currentGameSocket.readyState === WebSocket.OPEN) {
-        ////console.log('Fermeture de la WebSocket en cours...');
+        console.log('Fermeture de la WebSocket en cours...');
         window.currentGameSocket.close();
     }
     window.currentGameSocket = null;

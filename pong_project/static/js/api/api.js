@@ -23,7 +23,7 @@ const Api = {
       // Vérifie si l’access token expire bientôt et tente de le rafraîchir
       const jwtAccessToken = this.getJWTaccessToken();
       if (jwtAccessToken && this.isTokenExpiringSoon(jwtAccessToken)) {
-        console.warn("Access token sur le point d'expirer, tentative de rafraîchissement...");
+        // console.warn("Access token sur le point d'expirer, tentative de rafraîchissement...");
         const newToken = await this.handleTokenRefresh();
         if (newToken) {
           headers["Authorization"] = `Bearer ${newToken}`;
@@ -102,7 +102,7 @@ const Api = {
       const currentTime = Math.floor(Date.now() / 1000);
       return payload.exp - currentTime < 300;
     } catch (error) {
-      console.error("Erreur lors de la vérification de l'expiration du token :", error);
+      // console.error("Erreur lors de la vérification de l'expiration du token :", error);
       return true;
     }
   },
@@ -122,7 +122,7 @@ const Api = {
    * En cas d'erreur d'autorisation, tente de rafraîchir le token et réessaie la requête.
    */
   async handleUnauthorized(url, method, formData, customHeaders) {
-    console.warn("Accès non autorisé, tentative de rafraîchissement du token...");
+    //console.warn("Accès non autorisé, tentative de rafraîchissement du token...");
     const newAccessToken = await this.handleTokenRefresh();
     if (newAccessToken) {
       const updatedHeaders = {
@@ -149,7 +149,7 @@ const Api = {
   async handleTokenRefresh() {
     const jwtRefreshToken = this.getJWTrefreshToken();
     if (!jwtRefreshToken) {
-      console.error("Aucun refresh token disponible.");
+      //console.error("Aucun refresh token disponible.");
       return null;
     }
     try {
@@ -177,7 +177,7 @@ const Api = {
   
       if (!response.ok) {
         forceLogout("Impossible de rafraîchir le token, veuillez vous reconnecter.");
-        console.error("Erreur HTTP lors du rafraîchissement du token:", response.status, response.statusText);
+        //console.error("Erreur HTTP lors du rafraîchissement du token:", response.status, response.statusText);
         return null;
       }
   
@@ -189,11 +189,11 @@ const Api = {
         localStorage.setItem("access_token", newAccessToken);
         return newAccessToken;
       } else {
-        console.error("Erreur lors du rafraîchissement du token:", data ? data.message : "Aucune réponse");
+        //console.error("Erreur lors du rafraîchissement du token:", data ? data.message : "Aucune réponse");
         return null;
       }
     } catch (error) {
-      console.error("Échec du rafraîchissement du token :", error);
+      //console.error("Échec du rafraîchissement du token :", error);
       return null;
     }
   },
@@ -248,18 +248,18 @@ export async function requestGet(app, view) {
   try {
     return await Api.get(url);
   } catch (error) {
-    console.error(`Erreur lors du chargement de ${app}-${view} :`, error);
+    // console.error(`Erreur lors du chargement de ${app}-${view} :`, error);
     throw error;
   }
 }
 
 export async function requestPost(app, view, formData) {
   const url = `/${app}/${view}/`;
-  console.debug("POST request URL:", url);
+  // console.debug("POST request URL:", url);
   try {
     return await Api.post(url, formData);
   } catch (error) {
-    console.error(`Erreur lors du POST vers ${app}-${view} :`, error);
+    // console.error(`Erreur lors du POST vers ${app}-${view} :`, error);
     throw error;
   }
 }
@@ -269,7 +269,7 @@ export async function requestDelete(app, view, resourceId) {
   try {
     return await Api.delete(url);
   } catch (error) {
-    console.error(`Erreur lors de la suppression de ${app}-${view} avec ID ${resourceId} :`, error);
+    // console.error(`Erreur lors de la suppression de ${app}-${view} avec ID ${resourceId} :`, error);
     throw error;
   }
 }
