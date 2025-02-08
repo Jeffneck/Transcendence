@@ -206,7 +206,7 @@ class CleanDuplicateInvitationsView(View):
     en ne laissant intacte que la dernière invitation (la plus récente selon 'created_at').
     Version compatible avec tous les SGBD.
     """
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         try:
             # On considère uniquement les invitations en attente.
             pending_invitations = GameInvitation.objects.filter(status='pending')
