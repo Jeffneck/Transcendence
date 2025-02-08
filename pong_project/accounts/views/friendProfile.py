@@ -28,11 +28,11 @@ class FriendProfileView(View):
     """
 
     def get(self, request, friend_username):
-        logger.debug("Entering FriendProfileView.get()")
+        # logger.debug("Entering FriendProfileView.get()")
         try:
             # Récupérer l'ami par son nom d'utilisateur
             friend = get_object_or_404(User, username=friend_username)
-            logger.info(f"Friend found: {friend.username}")
+            # logger.info(f"Friend found: {friend.username}")
 
             # Utilisation du Manager pour récupérer l'historique des matchs
             matches = GameResult.objects.get_user_match_history(friend)
@@ -62,7 +62,7 @@ class FriendProfileView(View):
                     'played_at': match.ended_at,
                 })
 
-            logger.info(
+            # logger.info(
                 f"Statistics calculated: match_count={match_count}, victories={victories}, "
                 f"defeats={defeats}, best_score={best_score}, friends_count={friends_count}"
             )
@@ -87,7 +87,7 @@ class FriendProfileView(View):
             }, status=200)
 
         except Exception as e:
-            logger.error(f"Error loading friend profile: {e}")
+            # logger.error(f"Error loading friend profile: {e}")
             return JsonResponse(
                 {'status': 'error', 'message': _("Erreur lors du chargement du profil de l'ami.")},
                 status=500

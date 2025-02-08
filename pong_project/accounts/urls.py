@@ -24,7 +24,7 @@ from django.views.i18n import set_language
 # ---- Configuration ----
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-logger.debug("Rentre dans urls.py de app accounts")
+# logger.debug("Rentre dans urls.py de app accounts")
 
 # ---- Application namespace ----
 app_name = 'accounts'

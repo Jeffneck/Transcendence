@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 from game.models import GameResult  # Import du modèle mis à jour
 
@@ -25,10 +26,10 @@ User = get_user_model()
 @method_decorator(login_required_json, name='dispatch')
 class ProfileView(View):
     def get(self, request):
-        logger.debug("Entering ProfileView.get()")
+        # logger.debug("Entering ProfileView.get()")
         try:
             user = request.user
-            logger.info(f"User found: {user.username}")
+            # logger.info(f"User found: {user.username}")
 
             # ✅ Utilisation du Manager pour récupérer l'historique des matchs
             matches = GameResult.objects.get_user_match_history(user)
@@ -57,7 +58,7 @@ class ProfileView(View):
                     'played_at': match.ended_at,
                 })
 
-            logger.info(
+            # logger.info(
                 f"Statistics calculated: match_count={match_count}, victories={victories}, "
                 f"defeats={defeats}, best_score={best_score}, friends_count={friends_count}"
             )
@@ -80,5 +81,5 @@ class ProfileView(View):
             }, status=200)
 
         except Exception as e:
-            logger.error(f"Error loading user profile: {e}")
-            return JsonResponse({'status': 'error', 'message': 'An error occurred while loading the profile.'}, status=500)
+            # logger.error(f"Error loading user profile: {e}")
+            return JsonResponse({'status': 'error', 'message': _('Une erreur est survenue lors du chargement du profil.')}, status=500)

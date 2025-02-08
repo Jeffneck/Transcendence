@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_protect
 from accounts.models import RefreshToken, CustomUser
 from accounts.utils import generate_jwt_token
 from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class RefreshJwtView(View):
             # Récupère le refresh token depuis le formulaire (FormData)
             refresh_token = request.POST.get('refresh_token')
             if not refresh_token:
-                logger.warning("Refresh token not provided in request")
+                # logger.warning("Refresh token not provided in request")
                 return JsonResponse({'error': 'Refresh token is required'}, status=400)
 
             # Décodage du refresh token avec validation de la signature
@@ -42,7 +43,7 @@ class RefreshJwtView(View):
             # Vérifie la validité du refresh token dans la base via son hash
             token_obj = RefreshToken.objects.filter(token=hashed_token).first()
             if not token_obj or not token_obj.is_valid():
-                logger.warning("Invalid or expired refresh token")
+                # logger.warning("Invalid or expired refresh token")
                 return JsonResponse({'error': 'Invalid or expired refresh token', 'error_code': 'token-error'}, status=401)
 
             # Invalider le refresh token après usage pour éviter sa réutilisation
@@ -53,7 +54,7 @@ class RefreshJwtView(View):
             user_id = payload.get('user_id')
             user = CustomUser.objects.filter(id=user_id).first()
             if not user:
-                logger.warning(f"User with ID {user_id} not found")
+                # logger.warning(f"User with ID {user_id} not found")
                 return JsonResponse({'error': 'User not found'}, status=404)
 
             # Génère un nouveau access token (sans générer de nouveau refresh token)
@@ -62,11 +63,11 @@ class RefreshJwtView(View):
             return JsonResponse({'access_token': new_access_token}, status=200)
 
         except ExpiredSignatureError:
-            logger.warning("Refresh token expired")
+            # logger.warning("Refresh token expired")
             return JsonResponse({'error': 'Refresh token expired', 'error_code': 'token-error'}, status=401)
         except InvalidTokenError:
-            logger.warning("Invalid refresh token")
+            # logger.warning("Invalid refresh token")
             return JsonResponse({'error': 'Invalid refresh token', 'error_code': 'token-error'}, status=401)
         except Exception as e:
-            logger.error(f"Unexpected error during token refresh: {str(e)}")
+            # logger.error(f"Unexpected error during token refresh: {str(e)}")
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)

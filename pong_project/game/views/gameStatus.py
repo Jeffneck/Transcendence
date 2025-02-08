@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from game.models import GameSession
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 from pong_project.decorators import login_required_json
 
@@ -21,7 +22,7 @@ class GetGameStatusView(View):
         except GameSession.DoesNotExist:
             return JsonResponse({
                 'status': 'error',
-                'message': "La session de jeu spécifiée n'existe pas."
+                'message': _("La session de jeu spécifiée n'existe pas.")
             }, status=404)
 
         return JsonResponse({

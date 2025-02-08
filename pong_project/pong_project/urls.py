@@ -28,7 +28,7 @@ from core.views import landing_view  # Import direct de la view
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-logger.debug("Entrée dans urls.py de l'app Transcendence")
+# logger.debug("Entrée dans urls.py de l'app Transcendence")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

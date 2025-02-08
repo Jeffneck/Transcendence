@@ -43,7 +43,7 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-logger.debug("Rentre dans urls.py de l'app game")
+# logger.debug("Rentre dans urls.py de l'app game")
 
 app_name = 'game'
 

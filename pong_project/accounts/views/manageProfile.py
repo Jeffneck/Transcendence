@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from pong_project.decorators import login_required_json
 from django.contrib.auth import update_session_auth_hash, logout, get_user_model
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 from accounts.forms import UserNameForm, PasswordChangeForm, AvatarUpdateForm, DeleteAccountForm
 
@@ -49,7 +50,7 @@ class ChangeUsernameView(View):
         if form.is_valid():
             form.save()
             return JsonResponse(
-                {'status': 'success', 'message': "Nom d'utilisateur mis à jour avec succès."},
+                {'status': 'success', 'message': _("Nom d'utilisateur mis à jour avec succès.")},
                 status=200
             )
         else:
@@ -76,7 +77,7 @@ class DeleteAccountView(View):
             request.session.flush()  # Supprime toutes les données de session
             user.delete()
             return JsonResponse(
-                {'status': 'success', 'message': 'Votre compte a été supprimé avec succès.'},
+                {'status': 'success', 'message': _('Votre compte a été supprimé avec succès.')},
                 status=200
             )
         else:
@@ -102,7 +103,7 @@ class ChangePasswordView(View):
             form.save()
             update_session_auth_hash(request, user)  # Conserve la session active après le changement
             return JsonResponse(
-                {'status': 'success', 'message': 'Mot de passe mis à jour avec succès.'},
+                {'status': 'success', 'message': _('Mot de passe mis à jour avec succès.')},
                 status=200
             )
         else:
@@ -127,11 +128,11 @@ class UpdateAvatarView(View):
         if form.is_valid():
             form.save()
             return JsonResponse(
-                {'status': 'success', 'message': 'Avatar mis à jour avec succès.'},
+                {'status': 'success', 'message': _('Avatar mis à jour avec succès.')},
                 status=200
             )
         else:
-            logger.error("Erreur lors de la mise à jour de l'avatar: %s", form.errors)
+            # logger.error("Erreur lors de la mise à jour de l'avatar: %s", form.errors)
             error_messages = []
             for errors in form.errors.values():
                 error_messages.extend(errors)

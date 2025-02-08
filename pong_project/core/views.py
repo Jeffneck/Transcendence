@@ -17,7 +17,7 @@ def not_found_view(request):
     """
     Retourne la page 404 sous forme de JSON avec son contenu HTML.
     """
-    logger.debug("Entre dans not_found_view")
+    # logger.debug("Entre dans not_found_view")
     not_found_html = render_to_string('core/404.html')  # Assurez-vous que le template se trouve dans le bon dossier
     return JsonResponse({
         'status': 'success',
@@ -29,10 +29,10 @@ def get_navbar(request):
     """
     Génère et retourne le contenu de la barre de navigation sous forme de JSON.
     """
-    logger.debug("Entre dans get_navbar_view")
+    # logger.debug("Entre dans get_navbar_view")
     is_authenticated = request.user.is_authenticated
 
-    logger.debug("is_authenticated : " + str(is_authenticated))
+    # logger.debug("is_authenticated : " + str(is_authenticated))
 
     if is_authenticated:
         # Utilise le contexte du burger menu pour obtenir les données
@@ -44,11 +44,11 @@ def get_navbar(request):
             'burger_menu': burger_menu_html,
             'avatar_url': burger_menu_context['avatar_url'],  # Passer l'URL de l'avatar
         })
-        logger.debug("Navbar générée pour un utilisateur connecté")
+        # logger.debug("Navbar générée pour un utilisateur connecté")
     else:
         # Génération de la navbar publique
         navbar_html = render_to_string('core/navbar_public.html')
-        logger.debug("Navbar générée pour un utilisateur non connecté")
+        # logger.debug("Navbar générée pour un utilisateur non connecté")
 
     return JsonResponse({
         'status': 'success',
@@ -61,7 +61,7 @@ def home_view(request):
     """
     Retourne la page d'accueil sous forme de JSON avec son contenu HTML.
     """
-    logger.debug("Entre dans home_view")
+    # logger.debug("Entre dans home_view")
     home_html = render_to_string('core/home.html')
     return JsonResponse({
         'status': 'success',
@@ -73,6 +73,6 @@ def landing_view(request):
     """
     Retourne la page de destination avec un état d'authentification dans une réponse JSON.
     """
-    logger.debug("Entre dans landing_view")
+    # logger.debug("Entre dans landing_view")
     # IMPROVE html au lieu de json
     return render(request, 'core/landing.html')

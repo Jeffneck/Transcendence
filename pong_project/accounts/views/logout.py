@@ -23,10 +23,10 @@ class LogoutView(View):
     """
     def post(self, request):
         try:
-            logger.debug("Début de la déconnexion")
+            # logger.debug("Début de la déconnexion")
             raw_refresh_token = request.POST.get('refresh_token')
             if not raw_refresh_token:
-                logger.error("Aucun refresh token fourni")
+                # logger.error("Aucun refresh token fourni")
                 return JsonResponse({'error': _("Refresh token is required")}, status=400)
             
             # Calculer le hash SHA-256 du refresh token fourni par le client
@@ -34,16 +34,16 @@ class LogoutView(View):
             
             token = RefreshToken.objects.filter(token=hashed_refresh_token).first()
             if token:
-                logger.debug("Token trouvé, suppression...")
+                # logger.debug("Token trouvé, suppression...")
                 token.delete()
             else:
-                logger.error("Refresh token invalide")
+                # logger.error("Refresh token invalide")
                 return JsonResponse({'error': _("Invalid refresh token")}, status=401)
             
             logout(request)
-            logger.debug("Utilisateur déconnecté")
+            # logger.debug("Utilisateur déconnecté")
             return JsonResponse({'status': 'success', 'message': _('Déconnexion réussie.')})
         
         except Exception as e:
-            logger.error(f"Erreur lors de la déconnexion : {str(e)}")
+            # logger.error(f"Erreur lors de la déconnexion : {str(e)}")
             return JsonResponse({'error': _(str(e))}, status=500)

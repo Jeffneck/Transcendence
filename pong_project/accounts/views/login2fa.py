@@ -44,7 +44,7 @@ class Base2FAView(View):
             qr_code = base64.b64encode(buffered.getvalue()).decode()
             return qr_code
         except Exception as e:
-            logger.exception("Error generating QR code: %s", e)
+            # logger.exception("Error generating QR code: %s", e)
             raise
 
 
@@ -80,10 +80,10 @@ class Enable2FAView(Base2FAView):
                 'html': html_content,
             }, status=200)
         except Exception as e:
-            logger.exception("Error in Enable2FAView GET: %s", e)
+            # logger.exception("Error in Enable2FAView GET: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An error occurred while enabling 2FA.")
+                'message': _("Une erreur est survenue lors de l'activation de 2FA.")
             }, status=500)
 
 
@@ -100,14 +100,14 @@ class Check2FAView(View):
             if not totp_secret:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("No 2FA setup in progress.")
+                    'message': _("Aucune configuration 2FA en cours.")
                 }, status=400)
     
             code = request.POST.get('code')
             if not code:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("Code is required.")
+                    'message': _("Un code est requis.")
                 }, status=400)
     
             totp = pyotp.TOTP(totp_secret)
@@ -120,18 +120,18 @@ class Check2FAView(View):
                     del request.session['totp_secret']
                 return JsonResponse({
                     'status': 'success',
-                    'message': _("2FA has been successfully enabled.")
+                    'message': _("Le 2FA a été activé avec succès.")
                 }, status=200)
     
             return JsonResponse({
                 'status': 'error',
-                'message': _("Invalid 2FA code.")
+                'message': _("Code 2FA invalide.")
             }, status=400)
         except Exception as e:
-            logger.exception("Unexpected error in Check2FAView: %s", e)
+            # logger.exception("Unexpected error in Check2FAView: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An unexpected error occurred.")
+                'message': _("Une erreur inattendue est survenue.")
             }, status=500)
 
 
@@ -158,24 +158,24 @@ class Login2faView(View):
                 'html': html_content,
             }, status=200)
         except Exception as e:
-            logger.exception("Error rendering 2FA login form: %s", e)
+            # logger.exception("Error rendering 2FA login form: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An error occurred while rendering the form.")
+                'message': _("Une erreur est survenue lors du rendu du formulaire.")
             }, status=500)
     
     @method_decorator(require_POST, name='dispatch')
     def post(self, request):
         try:
-            logger.debug("user id: %s", request.session.get('user_id'))
-            logger.debug("auth_partial: %s", request.session.get('auth_partial'))
+            # logger.debug("user id: %s", request.session.get('user_id'))
+            # logger.debug("auth_partial: %s", request.session.get('auth_partial'))
             user_id = request.session.get('user_id')
             auth_partial = request.session.get('auth_partial')
     
             if not user_id or not auth_partial:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("Unauthorized access.")
+                    'message': _("Accès non autorisé")
                 }, status=403)
     
             user = get_object_or_404(User, id=user_id)
@@ -183,10 +183,10 @@ class Login2faView(View):
             if not code:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("Code is required.")
+                    'message': _("Un code est requis.")
                 }, status=400)
     
-            logger.debug("Received 2FA code submission.")
+            # logger.debug("Received 2FA code submission.")
     
             totp = pyotp.TOTP(user.totp_secret)
             if totp.verify(code):
@@ -197,24 +197,24 @@ class Login2faView(View):
                 if 'auth_partial' in request.session:
                     del request.session['auth_partial']
     
-                logger.debug("User authenticated successfully: %s", user.username)
+                # logger.debug("User authenticated successfully: %s", user.username)
                 return JsonResponse({
                     'status': 'success',
                     'access_token': token_jwt['access_token'],
                     'refresh_token': token_jwt['refresh_token'],
                     'is_authenticated': True,
-                    'message': _("2FA verified successfully. Login successful.")
+                    'message': _("2FA vérifié avec succès. Connexion réussie.")
                 }, status=200)
     
             return JsonResponse({
                 'status': 'error',
-                'message': _("Invalid 2FA code.")
+                'message': _("Code 2FA invalide.")
             }, status=400)
         except Exception as e:
-            logger.exception("Unexpected error in Login2faView POST: %s", e)
+            # logger.exception("Unexpected error in Login2faView POST: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An unexpected error occurred.")
+                'message': _("Une erreur inattendue est survenue.")
             }, status=500)
 
 
@@ -229,7 +229,7 @@ class Disable2FAView(View):
             if not request.user.is_2fa_enabled:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("2FA is not enabled on your account.")
+                    'message': _("Le 2FA n'est pas activé sur votre compte.")
                 }, status=400)
     
             disable_form = TwoFactorLoginForm()
@@ -241,10 +241,10 @@ class Disable2FAView(View):
                 'html': html_content
             }, status=200)
         except Exception as e:
-            logger.exception("Error in Disable2FAView GET: %s", e)
+            # logger.exception("Error in Disable2FAView GET: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An error occurred while rendering the form.")
+                'message': _("Une est survenue lors du rendu du formulaire.")
             }, status=500)
     
     @method_decorator(require_POST, name='dispatch')
@@ -253,14 +253,14 @@ class Disable2FAView(View):
             if not request.user.is_2fa_enabled:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("2FA is not enabled on your account.")
+                    'message': _("Le 2FA n'est pas activé sur votre compte.")
                 }, status=400)
     
             code = request.POST.get('code')
             if not code:
                 return JsonResponse({
                     'status': 'error',
-                    'message': _("Code is required.")
+                    'message': _("Un code est requis.")
                 }, status=400)
     
             totp = pyotp.TOTP(request.user.totp_secret)
@@ -271,16 +271,16 @@ class Disable2FAView(View):
                 request.user.save()
                 return JsonResponse({
                     'status': 'success',
-                    'message': _("2FA has been disabled.")
+                    'message': _("Le 2FA a été désactivé avec succès.")
                 }, status=200)
     
             return JsonResponse({
                 'status': 'error',
-                'message': _("Invalid 2FA code.")
+                'message': _("Code 2FA invalide.")
             }, status=400)
         except Exception as e:
-            logger.exception("Unexpected error in Disable2FAView POST: %s", e)
+            # logger.exception("Unexpected error in Disable2FAView POST: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("An unexpected error occurred.")
+                'message': _("Une erreur inattendue est survenue.")
             }, status=500)

@@ -345,6 +345,7 @@ from pong_project.decorators import login_required_json
 from game.forms import TournamentParametersForm
 from game.models import LocalTournament, GameSession, GameParameters
 from game.manager import schedule_game
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 logger = logging.getLogger(__name__)
 
@@ -359,25 +360,25 @@ class CreateTournamentView(View):
 
             form = TournamentParametersForm()
             if request.POST.get('is_touch', 'false') == "true":
-                return JsonResponse({'status': 'error', 'message': 'Mode non disponible pour le tactile'}, status=403)
+                return JsonResponse({'status': 'error', 'message': _('Mode non disponible pour le tactile')}, status=403)
             rendered_html = render_to_string('game/tournament/select_players.html', {'form': form}, request=request)
             return JsonResponse({'status': 'success', 'html': rendered_html}, status=200)
         except Exception as e:
-            logger.exception("Error in CreateTournamentView GET: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in CreateTournamentView GET: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
     
     def post(self, request):
         try:
             form = TournamentParametersForm(request.POST)
             if not form.is_valid():
-                logger.debug("Formulaire de tournoi invalide: %s", form.errors)
-                return JsonResponse({'status': 'error', 'message': 'Formulaire invalide.', 'errors': form.errors}, status=400)
+                # logger.debug("Formulaire de tournoi invalide: %s", form.errors)
+                return JsonResponse({'status': 'error', 'message': _('Formulaire invalide.'), 'errors': form.errors}, status=400)
             tournament = form.save()
-            logger.info(f"Tournament {tournament.id} créé avec succès.")
-            return JsonResponse({'status': 'success', 'tournament_id': str(tournament.id), 'message': f"Tournoi {tournament.name} créé avec succès."}, status=201)
+            # logger.info(f"Tournament {tournament.id} créé avec succès.")
+            return JsonResponse({'status': 'success', 'tournament_id': str(tournament.id), 'message': _(f"Tournoi {tournament.name} créé avec succès.")}, status=201)
         except Exception as e:
-            logger.exception("Error in CreateTournamentView POST: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in CreateTournamentView POST: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
@@ -411,8 +412,8 @@ class TournamentBracketView(View):
                 'player_avatars': player_avatars,
             }, status=200)
         except Exception as e:
-            logger.exception("Error in TournamentBracketView: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in TournamentBracketView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
@@ -433,7 +434,7 @@ class TournamentNextGameView(View):
             }
             next_match_type = match_mapping.get(tournament_status, None)
             if not next_match_type:
-                return JsonResponse({'status': 'error', 'message': f"Type de match invalide pour le statut : {tournament_status}"}, status=400)
+                return JsonResponse({'status': 'error', 'message': _(f"Type de match invalide pour le statut : {tournament_status}")}, status=400)
             if next_match_type == 'finished':
                 return JsonResponse({'status': 'success', 'html': "<p>Le tournoi est terminé !</p>", 'next_match_type': 'finished'}, status=200)
             if next_match_type == 'semifinal1':
@@ -451,8 +452,8 @@ class TournamentNextGameView(View):
             rendered_html = render_to_string('game/tournament/tournament_next_game.html', next_game_context, request=request)
             return JsonResponse({'status': 'success', 'html': rendered_html, 'next_match_type': next_match_type}, status=200)
         except Exception as e:
-            logger.exception("Error in TournamentNextGameView: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in TournamentNextGameView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
@@ -465,7 +466,7 @@ class CreateTournamentGameSessionView(View):
             tournament = get_object_or_404(LocalTournament, id=tournament_id)
             next_match_type = request.POST.get('next_match_type', '').strip()
             if not tournament.parameters:
-                return JsonResponse({'status': 'error', 'message': "Ce tournoi ne dispose pas de TournamentParameters."}, status=400)
+                return JsonResponse({'status': 'error', 'message': _("Ce tournoi ne dispose pas de TournamentParameters.")}, status=400)
             if next_match_type == 'semifinal1':
                 player_left_local = tournament.player1
                 player_right_local = tournament.player2
@@ -478,10 +479,10 @@ class CreateTournamentGameSessionView(View):
                 player_left_local = tournament.winner_semifinal_1
                 player_right_local = tournament.winner_semifinal_2
                 if not player_left_local or not player_right_local:
-                    return JsonResponse({'status': 'error', 'message': "Impossible de créer la finale: gagnants non définis."}, status=400)
+                    return JsonResponse({'status': 'error', 'message': _("Impossible de créer la finale: gagnants non définis.")}, status=400)
                 tournament.status = 'final_in_progress'
             else:
-                return JsonResponse({'status': 'error', 'message': f"Type de match invalide: {next_match_type}"}, status=400)
+                return JsonResponse({'status': 'error', 'message': _(f"Type de match invalide: {next_match_type}")}, status=400)
             
             game_session = GameSession.objects.create(
                 status='waiting',
@@ -505,19 +506,19 @@ class CreateTournamentGameSessionView(View):
             else:
                 tournament.final = game_session
             tournament.save()
-            logger.info(f"GameSession {game_session.id} créée pour {next_match_type}.")
+            # logger.info(f"GameSession {game_session.id} créée pour {next_match_type}.")
             context = {'player_left_name': player_left_local, 'player_right_name': player_right_local}
             rendered_html = render_to_string('game/live_game.html', context, request=request)
             return JsonResponse({
                 'status': 'success',
-                'message': f"{next_match_type} créée pour le tournoi {tournament.name}.",
+                'message': _(f"{next_match_type} créée pour le tournoi {tournament.name}."),
                 'game_id': str(game_session.id),
                 'html': rendered_html,
                 'tournament_status': tournament.status,
             }, status=201)
         except Exception as e:
-            logger.exception("Error in CreateTournamentGameSessionView: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in CreateTournamentGameSessionView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
@@ -529,15 +530,15 @@ class StartTournamentGameSessionView(View):
         try:
             session = get_object_or_404(GameSession, id=game_id)
             if session.is_online:
-                return JsonResponse({'status': 'error', 'message': "Cette session est en ligne, impossible de la lancer avec l'API locale."}, status=400)
+                return JsonResponse({'status': 'error', 'message': _("Cette session est en ligne, impossible de la lancer avec l'API locale.")}, status=400)
             if session.status in ['running', 'finished']:
-                return JsonResponse({'status': 'error', 'message': f"La partie {game_id} est déjà en cours ou terminée."}, status=400)
+                return JsonResponse({'status': 'error', 'message': _(f"La partie {game_id} est déjà en cours ou terminée.")}, status=400)
             schedule_game(str(session.id))
             session.status = 'running'
             session.ready_left = True
             session.ready_right = True
             session.save()
-            return JsonResponse({'status': 'success', 'message': f"Partie {game_id} lancée avec succès."}, status=200)
+            return JsonResponse({'status': 'success', 'message': _(f"Partie {game_id} lancée avec succès.")}, status=200)
         except Exception as e:
-            logger.exception("Error in StartTournamentGameSessionView: %s", e)
-            return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+            # logger.exception("Error in StartTournamentGameSessionView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)

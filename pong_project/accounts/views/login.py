@@ -39,7 +39,7 @@ class LoginView(View):
 
     @method_decorator(require_POST)
     def post(self, request):
-        logger.debug("Début de la méthode POST de LoginView")
+        # logger.debug("Début de la méthode POST de LoginView")
         form = LoginForm(request.POST)
 
         if not form.is_valid():
@@ -58,7 +58,7 @@ class LoginView(View):
 
         # Vérification de l'existence et de l'activité du compte
         if user is None or not user.is_active:
-            logger.warning("Tentative d'authentification échouée pour l'utilisateur: %s", username)
+            # logger.warning("Tentative d'authentification échouée pour l'utilisateur: %s", username)
             return JsonResponse(
                 {'status': 'error', 'message': error_message, 'error_code': 'not_authenticated'},
                 status=401
@@ -91,7 +91,7 @@ class LoginView(View):
             }
             return JsonResponse(response_data, status=200)
         except Exception as e:
-            logger.exception("Erreur lors de l'authentification pour l'utilisateur: %s", username)
+            # logger.exception("Erreur lors de l'authentification pour l'utilisateur: %s", username)
             return JsonResponse(
                 {'status': 'error', 'message': _("Erreur interne du serveur")},
                 status=500

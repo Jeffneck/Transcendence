@@ -81,6 +81,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import GameParameters, LocalTournament, TournamentParameters
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 class GameParametersForm(forms.ModelForm):
     class Meta:
@@ -145,7 +146,7 @@ class TournamentParametersForm(forms.ModelForm):
 
         players = [player1, player2, player3, player4]
         if len(set(players)) != 4:
-            raise ValidationError("Les noms des joueurs doivent être uniques.")
+            raise ValidationError(_("Les noms des joueurs doivent être uniques."))
         return cleaned_data
 
     def save(self, commit=True):

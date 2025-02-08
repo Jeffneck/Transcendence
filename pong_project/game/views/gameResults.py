@@ -76,6 +76,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from game.models import GameSession, GameResult
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +89,8 @@ class GameResultsView(View):
         try:
             session = GameSession.objects.get(id=game_id)
             if session.status != 'finished':
-                logger.error("La session n'est pas terminée.")
-                return JsonResponse({'status': 'error', 'message': "La session de jeu n'est pas terminée"}, status=401)
+                # logger.error("La session n'est pas terminée.")
+                return JsonResponse({'status': 'error', 'message': _("La session de jeu n'est pas terminée")}, status=401)
             results = get_object_or_404(GameResult, game=session)
             rendered_html = render_to_string('game/game_results.html', {
                 'game_id': session.id,
@@ -107,11 +108,11 @@ class GameResultsView(View):
                 'score_right': results.score_right,
             })
         except GameSession.DoesNotExist:
-            logger.error("Session de jeu non trouvée.")
-            return JsonResponse({'status': 'error', 'message': "La session de jeu demandée n'existe pas"}, status=404)
+            # logger.error("Session de jeu non trouvée.")
+            return JsonResponse({'status': 'error', 'message': _("La session de jeu demandée n'existe pas")}, status=404)
         except GameResult.DoesNotExist:
-            logger.error("Résultats non trouvés pour la session.")
-            return JsonResponse({'status': 'error', 'message': "Les résultats pour cette session de jeu ne sont pas disponibles"}, status=404)
+            # logger.error("Résultats non trouvés pour la session.")
+            return JsonResponse({'status': 'error', 'message': _("Les résultats pour cette session de jeu ne sont pas disponibles")}, status=404)
         except Exception as e:
-            logger.exception("Error in GameResultsView: %s", e)
-            return JsonResponse({'status': 'error', 'message': "Une erreur est survenue lors de la récupération des résultats"}, status=500)
+            # logger.exception("Error in GameResultsView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _("Une erreur est survenue lors de la récupération des résultats")}, status=500)

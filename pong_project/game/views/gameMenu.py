@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
 
 from game.forms import GameParametersForm
 from game.models import GameSession
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class GameMenuView(View):
 
     def get(self, request):
-        logger.debug("Handling GET request for GameMenuView")
+        # logger.debug("Handling GET request for GameMenuView")
 
         form = GameParametersForm()
 
@@ -30,10 +31,10 @@ class GameMenuView(View):
 
 
     def http_method_not_allowed(self, request, *args, **kwargs):
-        logger.warning(f"Méthode non autorisée : {request.method} pour GameMenuView")
+        # logger.warning(f"Méthode non autorisée : {request.method} pour GameMenuView")
         return JsonResponse({
             'status': 'error',
-            'message': 'Méthode non autorisée'
+            'message': _('Méthode non autorisée')
         }, status=405)
 
 
