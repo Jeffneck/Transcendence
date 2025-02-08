@@ -62,10 +62,10 @@ class FriendProfileView(View):
                     'played_at': match.ended_at,
                 })
 
-            # logger.info(
-                f"Statistics calculated: match_count={match_count}, victories={victories}, "
-                f"defeats={defeats}, best_score={best_score}, friends_count={friends_count}"
-            )
+            #  logger.info(
+            #     f"Statistics calculated: match_count={match_count}, victories={victories}, "
+            #     f"defeats={defeats}, best_score={best_score}, friends_count={friends_count}"
+            # )
 
             # Préparer le contexte pour le template
             context = {
