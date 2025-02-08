@@ -1,0 +1,67 @@
+services:
+  nginx:
+    build: ./nginx        # <- on build l'image depuis /nginx
+    container_name: pong_nginx
+    ports:
+      - "8081:80"
+      - "8443:443"        # ou "443:443" si tu veux le port 443 en direct
+    volumes:
+      - ./static:/static
+      - ./media:/app/media
+      - /dev/null:/var/log/nginx/access.log  # Rediriger les logs vers /dev/null
+    depends_on:
+      - uvicorn
+    networks:
+      - pong_network
+
+  uvicorn:
+    build: .
+    container_name: pong_uvicorn
+    command: /app/entrypoint.sh
+    volumes:
+      - .:/app
+      - ./media:/app/media
+  
+    environment:
+      - DJANGO_SETTINGS_MODULE=pong_project.settings
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=pong_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - "8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - pong_network
+
+  db:
+    image: postgres:15
+    container_name: pong_db
+    environment:
+      POSTGRES_DB: pong_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pong_network
+
+  redis:
+    image: redis:alpine
+    container_name: pong_redis
+    networks:
+      - pong_network
+
+networks:
+  pong_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
