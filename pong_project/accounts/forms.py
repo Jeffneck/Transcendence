@@ -43,7 +43,7 @@ class UserNameForm(forms.ModelForm):
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': "Nom d'utilisateur"
+                'placeholder': _("Nom d'utilisateur")
             }),
         }
 
@@ -68,6 +68,23 @@ class PasswordChangeForm(DjangoPasswordChangeForm):
     class Meta:
         model = User
         fields = ['old_password', 'new_password1', 'new_password2']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Met à jour le widget de l'ancien mot de passe
+        self.fields['old_password'].widget.attrs.update({
+            'placeholder': _("Ancien mot de passe"),
+            'class': 'form-control mb-3',
+        })
+        # Met à jour le widget du nouveau mot de passe
+        self.fields['new_password1'].widget.attrs.update({
+            'placeholder': _("Nouveau mot de passe"),
+            'class': 'form-control mb-3',
+        })
+        # Met à jour le widget de la confirmation du nouveau mot de passe
+        self.fields['new_password2'].widget.attrs.update({
+            'placeholder': _("Confirmez le nouveau mot de passe"),
+            'class': 'form-control mb-3',
+        })
 
 class CustomClearableFileInput(ClearableFileInput):
     """Widget personnalisé pour masquer 'Actuellement' et 'Effacer'."""

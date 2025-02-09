@@ -1,4 +1,5 @@
 {% load i18n %}
+{% trans "Nom d'utilisateur" as friend_placeholder %}
 <div id="burger-menu" class="position-fixed">
     <!-- Section de profil avec avatar et pastille de statut -->
     <div class="profile-section text-center mt-4 position-relative">
@@ -6,7 +7,7 @@
             <img id="profile-avatar" src="{{ user.avatar.url|default:'/media/avatars/default_avatar.png' }}" alt="Avatar" class="rounded-circle mb-2" style="width: 80px; height: 80px;">
             <span id="status-indicator" class="status-indicator {% if user.is_online %}online{% else %}offline{% endif %}"></span>
         </div>
-        <h5 id="profile-username" class="mb-0">{{ user.username }}</h5>
+        <h5 id="profile-username" class=" user-name mb-0">{{ user.username }}</h5>
     </div>
 
     <!-- Sélecteur pour changer le statut -->
@@ -26,7 +27,7 @@
         <h5 class="text-center" style="color: white">{% trans "Ajouter un ami" %}</h5>
         <form id="add-friend-form" method="POST">
             {% csrf_token %}
-            <input type="text" id="friend-username" name="friend_username" class="form-control mb-2" placeholder="Nom d'utilisateur">
+            <input type="text" id="friend-username" name="friend_username" class="form-control mb-2" placeholder="{{ friend_placeholder }}">
             <button type="submit" id="add-friend-button" class="btn btn-primary w-100">{% trans "Ajouter" %}</button>
         </form>
         <div id="add-friend-error" class="text-danger mt-2"></div>
@@ -60,8 +61,8 @@
                 <div class="position-relative">
                     <img src="{{ request.avatar_url|default:'/media/avatars/default_avatar.png' }}" alt="Avatar of {{ request.from_user }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
                 </div>
-                <div class="d-flex flex-column">
-                    <p>{{ request.from_user }}</p>
+                <div class="d-flex flex-column w-100">
+                    <p class="invite-name">{{ request.from_user }}</p>
                     <div class="d-flex">
                         <button class="btn btn-success btn-sm me-2" data-request-id="{{ request.id }}" data-action="accept">{% trans "Accepter" %}</button>
                         <button class="btn btn-danger btn-sm" data-request-id="{{ request.id }}" data-action="decline">{% trans "Refuser" %}</button>
@@ -83,8 +84,8 @@
                 <div class="position-relative">
                     <img src="{{ invitation.from_user.avatar.url|default:'/media/avatars/default_avatar.png' }}" alt="Avatar of {{ invitation.from_user.username }}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
                 </div>
-                <div class="d-flex flex-column">
-                    <p>{{ invitation.from_user.username }}</p>
+                <div class="d-flex flex-column w-100">
+                    <p class="invite-name">{{ invitation.from_user.username }}</p>
                     <div class="d-flex">
                         <button class="btn btn-success btn-sm me-2" data-invitation-id="{{ invitation.id }}" data-action="accept">{% trans "Accepter" %}</button>
                         <button class="btn btn-danger btn-sm" data-invitation-id="{{ invitation.id }}" data-action="decline">{% trans "Refuser" %}</button>
@@ -106,8 +107,8 @@
     </div>
 
     <!-- Popup pour les options d'ami -->
-    <div id="friendPopup" class="friend-popup d-none position-absolute">
-        <p id="popupFriendName" class="fw-bold mb-1 d-flex align-items-center justify-content-center">Options</p>
+    <div id="friendPopup" class="friend-popup d-none d-flex flex-column align-items-center position-absolute">
+        <p id="popupFriendName" class="fw-bold mb-1 text-center popup-name">Options</p>
         <button class="btn btn-profil mb-2" id="view-profile-btn">{% trans "Voir profil" %}</button>
         <!-- <button class="btn btn-invit mb-2" id="invite-to-play-btn">{% trans "Inviter à jouer" %}</button> retire car galere -->
         <button class="btn btn-delete" id="remove-friend-btn">{% trans "Supprimer" %}</button>
@@ -175,6 +176,25 @@
         background-color: rgba(255, 255, 255, 0.1);
     } */
 
+	.user-name, .popup-name, .invite-name, .friend-btn {
+		white-space: nowrap !important;  /* ✅ Empêche le texte de passer à la ligne */
+		overflow: hidden!important;  /* ✅ Cache tout ce qui dépasse */
+		text-overflow: ellipsis!important;  /* ✅ Ajoute "..." à la fin */
+	}
+
+	.invite-name, .user-name{
+		width: 80%;
+	}
+
+	.user-name{
+		margin: 0 auto;
+    	text-align: center;
+	}
+
+	.popup-name {
+		width: 90%;
+	}
+
 	.friend-popup {
         width: 150px;
         padding: 10px;
@@ -192,7 +212,7 @@
 
 	@media (max-width: 576px) {
     #burger-menu {
-        width: 100%; /* Prend toute la largeur de l'écran */
+        width: 100% !important; /* Prend toute la largeur de l'écran */
         height: var(--sin-nav-height); /* Prend toute la hauteur de l'écran */
         top: 50px; /* Aligne en haut de l'écran */
         left: 0; /* Aligne à gauche pour couvrir tout l'écran */

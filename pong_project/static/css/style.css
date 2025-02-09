@@ -379,13 +379,14 @@ h1, h2, h3, h4, h5, h6 {
 	position: fixed;
 	top: 58px;
 	right: 8px;
-	width: 400px; /* Largeur en pixels ajustable */
+	width: 400px !important; /* Largeur en pixels ajustable */
 	height: var(--burger-height); /* Prend toute la hauteur sous la navbar */
 	border-radius: 8px 8px 8px 8px;
 	display: none; /* Caché par défaut */
 	z-index: 200; /* Plus haut que l'overlay pour rester visible */
 	background-color: #141b2e;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 #burger-menu .dropdown-item {
@@ -472,8 +473,8 @@ h1, h2, h3, h4, h5, h6 {
 
 
 .center-content {
-	height: 100vh; /* Prend toute la hauteur de l'écran */
-	justify-content: center;
+	height: 100% !important; /* Prend toute la hauteur de l'écran */
+	justify-content: center !important;
 }
 .normal-content {
 	height: auto !important;

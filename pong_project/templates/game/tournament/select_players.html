@@ -1,43 +1,45 @@
 {% load i18n %}
 {% load static %}
-<div class="container-fluid py-4">
-  <h1 class="text-center mb-4" style="font-size: 2em;">{% trans "Sélectionner les joueurs" %}</h1>
+<div id="select_tournament" class="container-fluid d-flex flex-column justify-content-center align-items-center py-4" style="height: 100%!important; padding-top: 20px;">
+	<div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
+		<h1 class="text-center mb-4" style="font-size: 2em;">{% trans "Sélectionner les joueurs" %}</h1>
 
-  <!-- Formulaire de sélection des joueurs -->
-  <div class="card bg-secondary">
-    <div class="card-body">
-      <!-- 
-           id="tournament-form" pour qu'on puisse faire `document.querySelector('#tournament-form')` en JS
-           name=... pour que Django reçoive ces champs dans request.POST 
-      -->
-      <form id="tournament-form">
-        <div class="mb-3">
-          <label for="tournament-name" class="form-label">{% trans "Nom du Tournoi" %}</label>
-          <input type="text" id="tournament-name" name="name" class="form-control" placeholder="Nom du Tournoi" required>
-        </div>
+		<!-- Formulaire de sélection des joueurs -->
+		<div class="card bg-secondary">
+			<div class="card-body">
+				<!-- 
+					id="tournament-form" pour qu'on puisse faire `document.querySelector('#tournament-form')` en JS
+					name=... pour que Django reçoive ces champs dans request.POST 
+				-->
+				<form id="tournament-form">
+					<div class="mb-3">
+					<label for="tournament-name" class="form-label">{% trans "Nom du Tournoi" %}</label>
+					<input type="text" id="tournament-name" name="name" class="form-control" placeholder="{% trans 'Nom du Tournoi' %}" required>
+					</div>
 
-        <div class="mb-3">
-          <label for="player1" class="form-label">{% trans "Nom du Joueur 1" %}</label>
-          <input type="text" id="player1" name="player1" class="form-control" placeholder="Joueur 1" required>
-        </div>
-        <div class="mb-3">
-          <label for="player2" class="form-label">{% trans "Nom du Joueur 2" %}</label>
-          <input type="text" id="player2" name="player2" class="form-control" placeholder="Joueur 2" required>
-        </div>
-        <div class="mb-3">
-          <label for="player3" class="form-label">{% trans "Nom du Joueur 3" %}</label>
-          <input type="text" id="player3" name="player3" class="form-control" placeholder="Joueur 3" required>
-        </div>
-        <div class="mb-3">
-          <label for="player4" class="form-label">{% trans "Nom du Joueur 4" %}</label>
-          <input type="text" id="player4" name="player4" class="form-control" placeholder="Joueur 4" required>
-        </div>
+					<div class="mb-3">
+					<label for="player1" class="form-label">{% trans "Nom du Joueur 1" %}</label>
+					<input type="text" id="player1" name="player1" class="form-control" placeholder="{% trans 'Joueur 1'%}" required>
+					</div>
+					<div class="mb-3">
+					<label for="player2" class="form-label">{% trans "Nom du Joueur 2" %}</label>
+					<input type="text" id="player2" name="player2" class="form-control" placeholder="{% trans 'Joueur 2'%}" required>
+					</div>
+					<div class="mb-3">
+					<label for="player3" class="form-label">{% trans "Nom du Joueur 3" %}</label>
+					<input type="text" id="player3" name="player3" class="form-control" placeholder="{% trans 'Joueur 3'%}" required>
+					</div>
+					<div class="mb-3">
+					<label for="player4" class="form-label">{% trans "Nom du Joueur 4" %}</label>
+					<input type="text" id="player4" name="player4" class="form-control" placeholder="{% trans 'Joueur 4'%}" required>
+					</div>
 
-        <!-- Bouton de soumission -->
-        <button type="submit" class="btn btn-primary mt-3 w-100">{% trans "Lancer le tournoi" %}</button>
-      </form>
-    </div>
-  </div>
+					<!-- Bouton de soumission -->
+					<button type="submit" class="btn btn-primary mt-3 w-100">{% trans "Lancer le tournoi" %}</button>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -47,6 +49,9 @@
     color: rgb(223, 216, 216);
     overflow: auto;
   }
+  #content{
+		height: 100% !important;
+	}
   .container-fluid {
     padding-top: 20px;
     padding-bottom: 20px;

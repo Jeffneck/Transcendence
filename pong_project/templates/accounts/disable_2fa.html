@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="container-fluid d-flex justify-content-center mt-3" style="height: 100%; padding-top: 20px; z-index: 10;">
+<div id="disable-2FA-modal" class="container-fluid d-flex justify-content-center mt-3" style="height: 100%; padding-top: 20px; z-index: 10;">
 	<div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4 col-xxl-4">
 
 		<h2 class="text-white texte-center mb-3" style="font-size: 2em;">{% trans "Désactiver l'authentification à deux facteurs" %}</h2>
@@ -27,5 +27,9 @@
 		color: white;
 		font-size: 1.2em;
 		min-width: 300px;
+	}
+	#content {
+		min-height: 100vh !important;
+		height: auto !important;
 	}
 </style>

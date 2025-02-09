@@ -10,8 +10,8 @@
                 <h5 class="card-title">{% trans "Type de Partie" %}</h5>
                 <div class="d-flex flex-column gap-2">
                     <button id="local-game-btn" class="btn btn-primary w-100">{% trans "Partie Locale" %}</button>
-                    <button id="online-game-btn" class="btn btn-primary w-100">{% trans "Partie en ligne" %}</button>
-                    <button id="tournament-game-btn" class="btn btn-primary w-100">{% trans "Créer un tournoi en ligne" %}</button>
+                    <button id="online-game-btn" class="btn btn-primary w-100">{% trans "Jouer en ligne" %}</button>
+                    <button id="tournament-game-btn" class="btn btn-primary w-100">{% trans "Tournoi Local" %}</button>
                 </div>
             </div>
         </div>
@@ -36,6 +36,9 @@
 <style>
 	html, body {
 		overflow : auto;
+	}
+	#content{
+		height: 100% !important;
 	}
     .game-menu {
         color: rgb(223, 216, 216) !important;

@@ -1,6 +1,6 @@
 {%load static%}
 {%load i18n%}
-<div class="container-fluid d-flex flex-column align-items-center justify-content-start" style="height: 100%; width: 100%; ">
+<div class="container-fluid d-flex flex-column align-items-center justify-content-start" style="height: 100% !important; width: 100%; ">
    
 	<!-- Lignes de connexion pour le tournoi -->
 	<div id="bracket_tournament"  class="bracket d-flex flex-column align-items-center justify-content-center">
@@ -96,13 +96,13 @@
 	overflow: auto;
 }
 
-#content{
-	padding-bottom: 0 !important;
-}
-
 .bracket {
 	height: 100%;
 	width: 100%;
+}
+
+#content {
+	height: 100% !important;
 }
 
 .tournament-title{
@@ -204,6 +204,12 @@
     white-space: nowrap;  /* ✅ Empêche le texte de passer à la ligne */
     overflow: hidden;  /* ✅ Cache tout ce qui dépasse */
     text-overflow: ellipsis;  /* ✅ Ajoute "..." à la fin */
+}
+
+.title-choosen {
+	white-space: nowrap !important;  /* ✅ Empêche le texte de passer à la ligne */
+    overflow: hidden!important;  /* ✅ Cache tout ce qui dépasse */
+    text-overflow: ellipsis!important;  /* ✅ Ajoute "..." à la fin */
 }
 
 .bracket {

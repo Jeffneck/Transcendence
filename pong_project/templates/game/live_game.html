@@ -5,9 +5,9 @@
 	<div class="game-container d-flex justify-content-center align-items-center">
 		<!-- Zone de score positionnée en haut du terrain -->
 		<div id="score-display" class="score-display text-center">
-			<span class="player-name left">{{ player_left_name|default:"Joueur 1" }}</span>
+			<span class="player-name left">{{ player_left_name|default:"PLAYER1" }}</span>
 			<span id="score-nb"> | 0 - 0 | </span>
-			<span class="player-name right">{{ player_right_name|default:"Joueur 2" }}</span>
+			<span class="player-name right">{{ player_right_name|default:"PLAYER2" }}</span>
 		</div>
 		<button id="startGameBtn" class="btn starting-btn">PLAY</button>
 		<canvas id="gameCanvas"></canvas>
@@ -33,6 +33,9 @@
 		margin: 0;
 		padding: 0;
 		overflow: auto;
+	}
+	#content{
+		height: 100% !important;
 	}
 
 	.mask {
@@ -155,12 +158,19 @@
 		/* Au-dessus du canvas et du bouton PLAY */
 	}
 
+	.score-nb
+	{
+		display: inline-block;
+	}
 	.player-name.left,
 	.player-name.right {
-		color: rgba(45, 180, 243, 1);
-		/* Par exemple, rouge pour le joueur de gauche */
+		color: rgba(45, 180, 243, 1);	
 	}
-
+	.score-display, .player-name{
+		white-space: nowrap !important;  /* ✅ Empêche le texte de passer à la ligne */
+		overflow: hidden!important;  /* ✅ Cache tout ce qui dépasse */
+		text-overflow: ellipsis!important;  /* ✅ Ajoute "..." à la fin */
+	}
 		/* Conteneur des boutons tactiles affiché verticalement */
 	.touch-controls {
 	display: flex;

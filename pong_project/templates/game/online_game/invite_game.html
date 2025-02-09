@@ -1,5 +1,5 @@
 {% load i18n %}
-<div id="invite-container" class="container-fluid text-center d-flex flex-column align-items-center col-12" style="height: 100%; padding-top: 20px; z-index: 2;">
+<div id="invite-container" class="container-fluid text-center d-flex flex-column justify-content-center align-items-center" style="height: 100%!important; padding-top: 50px; z-index: 2;">
     <h2 class="text-white texte-center mb-4" style="font-size: 2.5em;">{% trans "Invitez un ami" %}</h2>
 
     <div class="list-group mb-4 col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
@@ -43,6 +43,10 @@
 <style>
 	body, html {
 		overflow: auto;
+	}
+
+	#content {
+		height: 100% !important;
 	}
 
 	.modal-overlay {

@@ -1,6 +1,6 @@
 {% load i18n %}
 <!-- Conteneur pour les boutons -->
-<div id="login" class=" container-fluid d-flex flex-column align-items-center text-center" style="height: 100%; padding-top: 70px;">
+<div id="login" class=" container-fluid d-flex flex-column align-items-center text-center" style="height: 100%; padding-top: 20px;">
 	<div class="col-8 col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
 		<h1 class="text-center text-white title mb-3">{% trans "Connexion" %}</h1>
         <form id="login-form" method="POST">
@@ -10,7 +10,7 @@
 				<label for="username" class="form-label text-white w-100">{% trans "Nom d'utilisateur :" %}</label>
 				<input type="text" class="form-control w-100" id="username" name="username" required>
 			</div>
-			<div class="form-group mb-2">
+			<div class="form-group mb-4">
 				<label for="password" class="form-label text-white w-100 mb-3">{% trans "Mot de passe :" %}</label>
 				<input type="password" class="form-control w-100" id="password" name="password" required>
 			</div>
@@ -27,7 +27,10 @@
 	html, body {
 		overflow-y: auto;
 	}
-	
+	#content {
+		min-height: 100vh !important;
+		height: auto !important;
+	}
 	.btn-primary {
 		min-width: 100px;
 	}

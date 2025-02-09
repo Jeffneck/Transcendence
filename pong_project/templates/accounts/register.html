@@ -1,7 +1,7 @@
 {% load i18n %}
 <!-- templates/User/register.html -->
 <!-- Conteneur pour les boutons -->
-<div id="register" class="container-fluid d-flex flex-column align-items-center " style="height: 100%; padding-top: 70px;">
+<div id="register" class="container-fluid d-flex flex-column align-items-center ">
 	<div class=" col-8 col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
 		<h1 class="text-center text-white title mb-3">{% trans "Inscription" %}</h1>
         <form id="register-form" method="POST">
@@ -27,5 +27,14 @@
 		html, body {
 			overflow-y: auto;
 		}
+		#content {
+			min-height: 100vh !important;
+			height: auto !important;
+		}
+		#register {
+			padding-top: 20px;
+			height: 100%;
+		}
+
 	</style>
 </div>

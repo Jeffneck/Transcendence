@@ -386,7 +386,7 @@ function initLiveGame(config) {
       
    
   
-	  function handleResize() {
+	function handleResize() {
 		const ORIGINAL_WIDTH = 800;
 		const ORIGINAL_HEIGHT = 400;
 		const margin = 12; // Marge interne utilisée pour le positionnement
@@ -409,8 +409,8 @@ function initLiveGame(config) {
 		// Mise à jour de la hauteur du conteneur des boutons (touch-controls)
 		const touchControls = document.querySelector('.touch-controls');
 		if (touchControls) {
-		  // On définit temporairement la hauteur en fonction du scale (pour le mode horizontal)
-		  touchControls.style.height = (ORIGINAL_HEIGHT * scale) + 'px';
+			// On définit temporairement la hauteur en fonction du scale (pour le mode horizontal)
+			touchControls.style.height = (ORIGINAL_HEIGHT * scale) + 'px';
 		}
 	  
 		// Appliquer le scale sur le canvas (dimension affichée)
@@ -429,47 +429,83 @@ function initLiveGame(config) {
 		// Positionnement du score-display par rapport au game-container
 		const scoreDisplay = document.getElementById("score-display");
 		if (scoreDisplay) {
-		  container.style.position = "relative"; // S'assurer que le container est positionné en relatif
-		  const canvasLeft = canvas.offsetLeft;
-		  const canvasTop = canvas.offsetTop;
-		  const canvasDisplayWidth = ORIGINAL_WIDTH * s;
-		  scoreDisplay.style.position = "absolute";
-		  scoreDisplay.style.left = (canvasLeft + canvasDisplayWidth / 2) + "px";
-		  scoreDisplay.style.top = (canvasTop + 2) + "px";
-		  scoreDisplay.style.transform = "translate(-50%, 0)";
-		  scoreDisplay.style.transformOrigin = "center top";
-		  scoreDisplay.style.fontSize = (30 * s) + "px";
+			container.style.position = "relative"; // S'assurer que le container est positionné en relatif
+			const canvasLeft = canvas.offsetLeft;
+			const canvasTop = canvas.offsetTop;
+			const canvasDisplayWidth = ORIGINAL_WIDTH * s;
+			scoreDisplay.style.position = "absolute";
+			scoreDisplay.style.left = (canvasLeft + canvasDisplayWidth / 2) + "px";
+			scoreDisplay.style.top = (canvasTop + 2) + "px";
+			scoreDisplay.style.transform = "translate(-50%, 0)";
+			scoreDisplay.style.transformOrigin = "center top";
+			scoreDisplay.style.fontSize = (30 * s) + "px";
+			scoreDisplay.style.width = (canvasDisplayWidth * 0.7) + "px";
+
+			const totalWidth = canvasDisplayWidth * 0.7; // largeur totale du score-display
+			const playerNameWidth = (totalWidth * 0.4) + "px"; // 40% chacun
+			const scoreNbWidth = (totalWidth * 0.2) + "px"; // 20% chacun
+
+			// Imposer une taille aux éléments .player-name pour tronquer le texte trop long
+			const playerNames = scoreDisplay.querySelectorAll('.player-name');
+			if (playerNames && playerNames.length > 0) {
+				playerNames.forEach(function(name) {
+					if (name) { // Sécurité au cas où name serait null
+						// Pour appliquer une largeur sur un <span>, passer en inline-block
+						name.style.display = "inline-block";
+						name.style.width = playerNameWidth;
+						// name.style.overflow = "hidden";
+						// name.style.whiteSpace = "nowrap";
+						// name.style.textOverflow = "ellipsis";
+						// Assurer un alignement vertical cohérent
+						name.style.verticalAlign = "middle";
+						if (name.classList.contains("left")) {
+							// Pour le player-name-left, le texte est aligné à droite
+							name.style.textAlign = "right";
+						} else if (name.classList.contains("right")) {
+							// Pour le player-name-right, le texte est aligné à gauche
+							name.style.textAlign = "left";
+						}
+					}
+				});
+			}
+
+			// Imposer la taille et l'alignement du score-nb
+			const scoreNb = scoreDisplay.querySelector('#score-nb');
+			if (scoreNb) {
+
+			scoreNb.style.width = scoreNbWidth;
+			scoreNb.style.verticalAlign = "middle";
+			scoreNb.style.textAlign = "center"; // pour centrer le texte à l'intérieur
+			}
 		}
 	  
 		// --- Sélection du layout en fonction de l'orientation ---
 		if (isTouchDevice() && window.innerWidth < window.innerHeight) {
 			const livegame = document.getElementById("livegame");
 			if (livegame) {
-			  livegame.classList.add("rotate90");
-			  // Appliquer les styles pour le mode vertical sur tactile
-			  livegame.style.display = "flex";
-			  // On laisse livegame en disposition normale (pas de flex-column ici, puisque les boutons seront dans .game-container)
-			  // On impose que livegame occupe toute la hauteur de la fenêtre
-			  livegame.style.height = window.innerHeight + "px";
-			  // On fixe sa largeur à 100vh (correspondant à la hauteur de la fenêtre)
-			  livegame.style.width = "100vh";
-		  
-			  // Ajuster le conteneur de jeu interne
-			  const innerContainer = livegame.querySelector(".game-container");
-			  if (innerContainer) {
-				innerContainer.style.display = "flex";
-				innerContainer.style.flexDirection = "column"; // Empile le canvas et les boutons verticalement
-				innerContainer.style.alignItems = "center";
-				innerContainer.style.justifyContent = "center";
-				innerContainer.style.maxHeight = "90%";
-				innerContainer.style.width = "85%";
-				// innerContainer.style.width = "85%";
-				innerContainer.style.margin = "auto";
-				innerContainer.style.marginLeft = "0";
-				innerContainer.style.left = "4%";
-
-
-			  }
+				livegame.classList.add("rotate90");
+				// Appliquer les styles pour le mode vertical sur tactile
+				livegame.style.display = "flex";
+				// On laisse livegame en disposition normale (pas de flex-column ici, puisque les boutons seront dans .game-container)
+				// On impose que livegame occupe toute la hauteur de la fenêtre
+				livegame.style.height = window.innerHeight + "px";
+				// On fixe sa largeur à 100vh (correspondant à la hauteur de la fenêtre)
+				livegame.style.width = "100vh";
+			
+				// Ajuster le conteneur de jeu interne
+				const innerContainer = livegame.querySelector(".game-container");
+				if (innerContainer) {
+					innerContainer.style.display = "flex";
+					innerContainer.style.flexDirection = "column"; // Empile le canvas et les boutons verticalement
+					innerContainer.style.alignItems = "center";
+					innerContainer.style.justifyContent = "center";
+					innerContainer.style.maxHeight = "90%";
+					innerContainer.style.width = "85%";
+					// innerContainer.style.width = "85%";
+					innerContainer.style.margin = "auto";
+					innerContainer.style.marginLeft = "0";
+					innerContainer.style.left = "4%";
+				}
 
 				// Pour garantir que le canvas garde toujours son ratio 2:1,
 				// on calcule le scale comme d'habitude, puis on impose une hauteur minimale.
@@ -479,7 +515,7 @@ function initLiveGame(config) {
 				let scale = Math.min(containerWidth / ORIGINAL_WIDTH, window.innerWidth * 0.8 / ORIGINAL_HEIGHT);
 				const minCanvasHeight = 100; // Hauteur minimale désirée
 				if ((ORIGINAL_HEIGHT * scale) < minCanvasHeight) {
-				scale = minCanvasHeight / ORIGINAL_HEIGHT;
+					scale = minCanvasHeight / ORIGINAL_HEIGHT;
 				}
 				// Appliquer le scale au canvas
 				const canvas = document.getElementById('gameCanvas');
@@ -491,22 +527,60 @@ function initLiveGame(config) {
 				// Ajuster le score-display (en se basant sur le canvas et le scale)
 				const scoreDisplay = document.getElementById("score-display");
 				if (scoreDisplay) {
-				innerContainer.style.position = "relative";
-				const canvasLeft = canvas.offsetLeft;
-				const canvasTop = canvas.offsetTop;
-				const canvasDisplayWidth = ORIGINAL_WIDTH * scale;
-				scoreDisplay.style.position = "absolute";
-				scoreDisplay.style.left = (canvasLeft + canvasDisplayWidth / 2) + "px";
-				scoreDisplay.style.top = (canvasTop + 2) + "px";
-				scoreDisplay.style.transform = "translate(-50%, 0)";
-				scoreDisplay.style.transformOrigin = "center top";
-				// On peut utiliser clamp() pour une taille de police adaptative
-				scoreDisplay.style.fontSize = `clamp(16px, ${30 * scale}px, 30px)`;
+					innerContainer.style.position = "relative";
+					const canvasLeft = canvas.offsetLeft;
+					const canvasTop = canvas.offsetTop;
+					const canvasDisplayWidth = ORIGINAL_WIDTH * scale;
+					scoreDisplay.style.position = "absolute";
+					scoreDisplay.style.left = (canvasLeft + canvasDisplayWidth / 2) + "px";
+					scoreDisplay.style.top = (canvasTop + 2) + "px";
+					scoreDisplay.style.transform = "translate(-50%, 0)";
+					scoreDisplay.style.transformOrigin = "center top";
+					// On peut utiliser clamp() pour une taille de police adaptative
+					scoreDisplay.style.fontSize = `clamp(16px, ${30 * scale}px, 30px)`;
+					scoreDisplay.style.width = (canvasDisplayWidth * 0.8) + "px";
+
+					const totalWidth = canvasDisplayWidth * 0.7; // largeur totale du score-display
+					const playerNameWidth = (totalWidth * 0.4) + "px"; // 40% chacun
+					const scoreNbWidth = (totalWidth * 0.2) + "px"; // 20% chacun
+			
+					// Imposer une taille aux éléments .player-name pour tronquer le texte trop long
+					const playerNames = scoreDisplay.querySelectorAll('.player-name');
+					if (playerNames && playerNames.length > 0) {
+						playerNames.forEach(function(name) {
+							if (name) { // Sécurité au cas où name serait null
+								// Pour appliquer une largeur sur un <span>, passer en inline-block
+								name.style.display = "inline-block";
+								name.style.width = playerNameWidth;
+								// name.style.overflow = "hidden";
+								// name.style.whiteSpace = "nowrap";
+								// name.style.textOverflow = "ellipsis";
+								// Assurer un alignement vertical cohérent
+								name.style.verticalAlign = "middle";
+								if (name.classList.contains("left")) {
+									// Pour le player-name-left, le texte est aligné à droite
+									name.style.textAlign = "right";
+								} else if (name.classList.contains("right")) {
+									// Pour le player-name-right, le texte est aligné à gauche
+									name.style.textAlign = "left";
+								}
+							}
+						});
+					}
+
+		
+					// Imposer la taille et l'alignement du score-nb
+					const scoreNb = scoreDisplay.querySelector('#score-nb');
+					if (scoreNb) {
+						scoreNb.style.width = scoreNbWidth;
+						scoreNb.style.verticalAlign = "middle";
+						scoreNb.style.textAlign = "center"; // pour centrer le texte à l'intérieur
+					}
 				}
-		  
-			  // Dans ce mode, on veut que les boutons se placent sous le canvas
-			  const touchControls = livegame.querySelector(".touch-controls");
-			  if (touchControls) {
+			
+				// Dans ce mode, on veut que les boutons se placent sous le canvas
+				const touchControls = livegame.querySelector(".touch-controls");
+				if (touchControls) {
 				// On retire toute propriété de position absolue pour laisser la disposition en flux (flow)
 				touchControls.style.position = "static";
 				// Ajouter une marge supérieure pour séparer le canvas des boutons
@@ -517,39 +591,43 @@ function initLiveGame(config) {
 				touchControls.style.width = (canvasRect.width * 0.1) + "px";
 
 				touchControls.style.marginLeft = (canvasRect.width * 2.15) + "px";
-			  }
+				}
 			}
-		  }		   else if ((touchControls && getComputedStyle(touchControls).display !== "none")|| (isTouchDevice() && window.innerWidth > window.innerHeight)) {
-		  // Mode horizontal ou appareil non tactile
-		  // On retire les styles spécifiques au mode vertical, le cas échéant.
-		  const livegame = document.getElementById("livegame");
-		  if (livegame) {
-			livegame.classList.remove("rotate90");
-			livegame.style.height = "100%";
-			livegame.style.width = "100%";
-		  }
-		  
-		  if (touchControls) {
-			// On réapplique la logique de positionnement relative au canvas
-			const canvasRect = canvas.getBoundingClientRect();
-			const containerRect = container.getBoundingClientRect();
-			const gap = canvasRect.width * 0.01;
-			const relativeCanvasRight = canvasRect.right - containerRect.left;
-			touchControls.style.position = 'absolute';
-			touchControls.style.left = (relativeCanvasRight + gap) + 'px';
-			const relativeCanvasTop = canvasRect.top - containerRect.top;
-			touchControls.style.top = relativeCanvasTop + 'px';
-			touchControls.style.height = canvasRect.height + 'px';
-			touchControls.style.width = (canvasRect.width * 0.07) + 'px';
-			touchControls.style.marginLeft = "0px";
-		  }
+		} else if ((touchControls && getComputedStyle(touchControls).display !== "none")|| (isTouchDevice() && window.innerWidth > window.innerHeight)) {
+			// Mode horizontal ou appareil non tactile
+			// On retire les styles spécifiques au mode vertical, le cas échéant.
+			const livegame = document.getElementById("livegame");
+			if (livegame) {
+				livegame.classList.remove("rotate90");
+				livegame.style.height = "100%";
+				livegame.style.width = "100%";
+			}
+			
+			if (touchControls) {
+				// On réapplique la logique de positionnement relative au canvas
+				const canvasRect = canvas.getBoundingClientRect();
+				const containerRect = container.getBoundingClientRect();
+				const gap = canvasRect.width * 0.01;
+				const relativeCanvasRight = canvasRect.right - containerRect.left;
+				touchControls.style.position = 'absolute';
+				touchControls.style.left = (relativeCanvasRight + gap) + 'px';
+				const relativeCanvasTop = canvasRect.top - containerRect.top;
+				touchControls.style.top = relativeCanvasTop + 'px';
+				touchControls.style.height = canvasRect.height + 'px';
+				touchControls.style.width = (canvasRect.width * 0.07) + 'px';
+				touchControls.style.marginLeft = "0px";
+			}
 		}
-	  }
-	  
-	  window.addEventListener('resize', handleResize);
-	  window.addEventListener('load', handleResize);
-	  handleResize();
-	  
+	}
+	
+	window.addEventListener('resize', handleResize);
+	window.addEventListener('load', handleResize);
+	window.addEventListener('orientationchange', function() {
+		// Délai pour permettre à l'orientation de se stabiliser
+		setTimeout(handleResize, 100);
+	});
+	handleResize();
+	
 
 
 

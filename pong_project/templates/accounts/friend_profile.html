@@ -9,8 +9,8 @@
             <div class="card p-4">
                 <div class="profile-info d-flex flex-column justify-content-center align-items-center">
                     <img id="profile-avatar" src="{{ friend.avatar.url|default_if_none:'/media/avatars/default_avatar.png' }}" alt="Avatar" style="width: 120px; height: 120px;">
-                    <div class="mt-3">
-                        <h3>{% trans "Pseudo : " %}{{ friend.username }}</h3>
+                    <div class="mt-3 w-100">
+                        <h3 class="user-name">{% trans "Pseudo : " %}{{ friend.username }}</h3>
                         <p class="mb-0">{% trans "Nombre de matchs joués : " %}<strong>{{ match_count|default:"N/A" }}</strong></p>
                     </div>
                 </div>
@@ -101,6 +101,12 @@
         border-radius: 10px;
         min-width: 300px;
     }
+	.user-name {
+		white-space: nowrap !important;  /* ✅ Empêche le texte de passer à la ligne */
+		overflow: hidden!important;  /* ✅ Cache tout ce qui dépasse */
+		text-overflow: ellipsis!important;  /* ✅ Ajoute "..." à la fin */
+    	text-align: center;
+	}
 
 
 </style>

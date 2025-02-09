@@ -1,16 +1,27 @@
 {% load i18n %}
 
-<div id="results-container" class="container d-flex flex-column align-items-center justify-content-center col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
-    <!-- Titre agrandi et centré -->
-    <h1 id="results-title" class="text-center text-white mb-4">{% trans "Résultats du jeu" %}</h1>
-    
-    <!-- Bloc des résultats dimensionné en fonction de l'écran -->
-    <div class="statistics d-flex flex-column align-items-center justify-content-center">
-      <p class="d-flex flex-column  text-center"><strong class="stat-title">{% trans "Winner" %}</strong> {{ winner }}</p>
-      <p class="d-flex flex-column  text-center"><strong class="stat-title">{% trans "Looser" %}</strong> {{ looser }}</p>
-      <p class="d-flex flex-column  text-center"><strong class="stat-title">{% trans "Score" %}</strong> {{ score_left }} - {{ score_right }}</p>
-    </div>
-  </div>
+<div id="results-container" class="container d-flex flex-column align-items-center text-center" style="height: 100%; padding-top: 20px;">
+	<div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
+		<!-- Titre agrandi et centré -->
+		<h1 id="results-title" class="text-center text-white mb-4">{% trans "Résultats du jeu" %}</h1>
+		
+		<!-- Bloc des résultats dimensionné en fonction de l'écran -->
+		<div class="statistics d-flex flex-column align-items-center justify-content-center mb-4 w-100">
+		<p class="d-flex flex-column  text-center user-name">
+			<strong class="stat-title">{% trans "Vainqueur" %}</strong>
+			<span class="user-name">{{ winner }}</span>
+		</p>
+		<p class="d-flex flex-column  text-center user-name">
+			<strong class="stat-title">{% trans "Perdant" %}</strong>
+			<span class="user-name">{{ looser }}</span>
+		</p>
+		<p class="d-flex flex-column  text-center user-name">
+			<strong class="stat-title">{% trans "Score" %}</strong>
+			<span>{{ score_left }} - {{ score_right }}</span>
+		</p>
+		</div>
+	</div>
+</div>
 
   <style>
     html, body {
@@ -20,11 +31,15 @@
       padding: 0;
       overflow: auto;
     }
+	#content {
+		min-height: 100vh !important;
+		height: auto !important;
+	}
     /* Conteneur principal qui prend toute la hauteur de la page */
     #results-container {
-		z-index: 25;
-      min-height: 100vh;
-      padding-top: 20px;
+	  z-index: 25;
+      height: 100%;
+      padding-top: 50px;
     }
     /* Style du titre agrandi et centré */
     #results-title {
@@ -47,4 +62,11 @@
       color: #2DB4F3;
 	  font-size: 1.3em;
     }
+	.user-name {
+		white-space: nowrap !important;  /* ✅ Empêche le texte de passer à la ligne */
+		overflow: hidden!important;  /* ✅ Cache tout ce qui dépasse */
+		text-overflow: ellipsis!important;  /* ✅ Ajoute "..." à la fin */
+		width: 90%;
+		min-width: none; /* permet ici d'empecher le d-flex de cacher les "..." */
+	}
   </style>

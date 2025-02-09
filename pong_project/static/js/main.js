@@ -16,4 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   adjustContainerIfExists('login');
   adjustContainerIfExists('register');
   adjustContainerIfExists('bracket_tournament');
+  adjustContainerIfExists('results-container');
+  adjustContainerIfExists('select_tournament');
+  adjustContainerIfExists('invite-container');
 });

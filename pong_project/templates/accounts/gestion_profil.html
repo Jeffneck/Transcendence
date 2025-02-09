@@ -73,9 +73,9 @@
 					<h5 class="card-title mb-2">{% trans "Changer de mot de passe" %}</h5>
 					<form id="change-password-form" method="POST" style="color: white">
 						{% csrf_token %}
-                        {{ password_form.old_password|add_class:"form-control mb-3"|attr:"placeholder:Ancien mot de passe" }}
-						{{ password_form.new_password1|add_class:"form-control mb-3"|attr:"placeholder:Nouveau mot de passe" }}
-						{{ password_form.new_password2|add_class:"form-control mb-3"|attr:"placeholder:Confirmez le nouveau mot de passe" }}
+						{{ password_form.old_password }}
+						{{ password_form.new_password1 }}
+						{{ password_form.new_password2 }}
 						<button type="submit" class="btn btn-primary w-90">{% trans "Valider" %}</button>
 						<div id="change-password-error" class="text-danger mt-2"></div>
 						<div id="change-password-success" class="text-success mt-2"></div>
@@ -270,4 +270,6 @@
         background-color: #f8f9fa; /* Couleur de fond */
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Légère ombre interne */
     }
+
+	
     </style>
