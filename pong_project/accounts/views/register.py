@@ -62,3 +62,5 @@ class RegisterView(View):
                 'status': 'error',
                 'message': error_message,
             }, status=400)
+
+

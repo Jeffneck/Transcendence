@@ -12,6 +12,7 @@
 import { requestPost } from '../api/index.js';
 import { createPowerupSVG, createBumperSVG } from './live_game_svg.js';
 import { isTouchDevice } from "../tools/index.js";
+import { navigateTo } from '../router.js';
 
 
 export async function launchLiveGameWithOptions(gameId, userRole, urlStartButton) {
@@ -76,7 +77,33 @@ export async function launchLiveGameWithOptions(gameId, userRole, urlStartButton
     }, duration);
   }
 
+  // ========== Manage inactivity online game ==========
+  let lastGameStateReceived = Date.now(); // Timestamp de la dernière réception de gameState
+  const timeoutDuration = 3000; // 2 secondes
+  let inactivityTimer;
+  let socketClosed = false
 
+  function resetInactivityTimer() {
+    // Si une nouvelle notification de gameState arrive, on redémarre le timer
+    lastGameStateReceived = Date.now();
+    
+    // Annule l'ancien timer, s'il existe
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+    }
+
+    // Lance un nouveau timer
+    inactivityTimer = setTimeout(() => {
+      // Si le temps d'inactivité dépasse 2 secondes, on navigue vers /home
+      console.log('inactivity detected')
+      if(socketClosed === false){
+        console.log('socket wasn t closed yet')
+        navigateTo('/home');
+      }  
+        // resolve(); 
+
+    }, timeoutDuration);
+  }
 
 // ========== La grosse fonction initLiveGame ==========
 
@@ -126,175 +153,189 @@ function initLiveGame(config) {
 
 	// Draw visual effects / added
 	function drawCollisionEffects() {
-		collisionEffects.forEach(effect => {
-			const age = effect.type.includes('spawn') ?
-			  Date.now() - effect.startTime :
-			  Date.now() - effect.startTime;
-			const duration = effect.type.includes('spawn') ?
-			  SPAWN_EFFECT_DURATION :
-			  EXPIRE_EFFECT_DURATION;
-			const progress = age / duration;
-  
-			ctx.save();
-			ctx.globalAlpha = 1 - progress;
-  
-			switch(effect.type) {
-				case 'paddle_collision':
-					// Ripple effect
-					const rippleSize = 20 + (progress * 40);
-					ctx.strokeStyle = 'white';
-					ctx.lineWidth = 3 * (1 - progress);
-					ctx.beginPath();
-					ctx.arc(effect.x, effect.y, rippleSize, 0, Math.PI * 2);
-					ctx.stroke();
-					break;
-  
-				// case 'border_collision':
-				//     // Simple glow effect at collision point
-				//     const glowSize = 20 * (1 - progress);
-				//     ctx.shadowColor = 'white';
-				//     ctx.shadowBlur = 15 * (1 - progress);
-					
-				//     ctx.beginPath();
-				//     ctx.arc(effect.x, effect.border_side === 'up' ? 50 : 350, glowSize, 0, Math.PI * 2);
-				//     ctx.fillStyle = 'rgba(255, 255, 255, ' + (1 - progress) + ')';
-				//     ctx.fill();
-				//     break;
-  
-				case 'bumper_collision':
-					// Explosion effect
-					const numParticles = 8;
-					const radius = 30 * progress;
-					ctx.strokeStyle = '#4169E1';
-					ctx.lineWidth = 3 * (1 - progress);
-					
-					for (let i = 0; i < numParticles; i++) {
-						const angle = (i / numParticles) * Math.PI * 2;
-						const startX = effect.x + Math.cos(angle) * 10;
-						const startY = effect.y + Math.sin(angle) * 10;
-						const endX = effect.x + Math.cos(angle) * radius;
-						const endY = effect.y + Math.sin(angle) * radius;
-						
-						ctx.beginPath();
-						ctx.moveTo(startX, startY);
-						ctx.lineTo(endX, endY);
-						ctx.stroke();
-					}
-					break;
-				case 'powerup_spawn':
-					// Expanding circles with powerup color
-					const circles = 3;
-					ctx.strokeStyle = effect.color;
-					ctx.lineWidth = 2;
-					
-					for (let i = 0; i < circles; i++) {
-						const circleProgress = (progress + (i / circles)) % 1;
-						const radius = circleProgress * 40;
-						ctx.beginPath();
-						ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
-						ctx.stroke();
-					}
-  
-					// Add sparkles
-					const sparkles = 8;
-					for (let i = 0; i < sparkles; i++) {
-						const angle = (i / sparkles) * Math.PI * 2;
-						const sparkleDistance = 20 + (progress * 20);
-						const x = effect.x + Math.cos(angle) * sparkleDistance;
-						const y = effect.y + Math.sin(angle) * sparkleDistance;
-						
-						ctx.beginPath();
-						ctx.arc(x, y, 2, 0, Math.PI * 2);
-						ctx.fillStyle = effect.color;
-						ctx.fill();
-					}
-					break;
-  
-				case 'powerup_expire':
-					// Imploding effect
-					const fadeRadius = 20 * (1 - progress);
-					ctx.strokeStyle = effect.color;
-					ctx.lineWidth = 2 * (1 - progress);
-					
-					// Shrinking circle
-					ctx.beginPath();
-					ctx.arc(effect.x, effect.y, fadeRadius, 0, Math.PI * 2);
-					ctx.stroke();
-					
-					// Particles moving inward
-					const particles = 6;
-					for (let i = 0; i < particles; i++) {
-						const angle = (i / particles) * Math.PI * 2;
-						const distance = fadeRadius * 2;
-						const x = effect.x + Math.cos(angle) * distance * progress;
-						const y = effect.y + Math.sin(angle) * distance * progress;
-						
-						ctx.beginPath();
-						ctx.arc(x, y, 2, 0, Math.PI * 2);
-						ctx.fill();
-					}
-					break;
-  
-				case 'bumper_spawn':
-					// Expanding diamond pattern
-					ctx.strokeStyle = '#4169E1';
-					ctx.lineWidth = 2;
-					const size = 40 * progress;
-					const rotation = progress * Math.PI;
-					
-					ctx.translate(effect.x, effect.y);
-					ctx.rotate(rotation);
-					
-					// Inner diamond
-					ctx.beginPath();
-					ctx.moveTo(0, -size);
-					ctx.lineTo(size, 0);
-					ctx.lineTo(0, size);
-					ctx.lineTo(-size, 0);
-					ctx.closePath();
-					ctx.stroke();
-					
-					// Outer diamond
-					ctx.beginPath();
-					ctx.moveTo(0, -size * 1.5);
-					ctx.lineTo(size * 1.5, 0);
-					ctx.lineTo(0, size * 1.5);
-					ctx.lineTo(-size * 1.5, 0);
-					ctx.closePath();
-					ctx.stroke();
-					break;
-  
-				case 'bumper_expire':
-					// Dissolving rings effect
-					ctx.strokeStyle = '#4169E1';
-					ctx.lineWidth = 2 * (1 - progress);
-					
-					const rings = 3;
-					for (let i = 0; i < rings; i++) {
-						const ringProgress = (progress + (i / rings)) % 1;
-						const ringRadius = 20 * ringProgress;
-						
-						ctx.beginPath();
-						ctx.arc(effect.x, effect.y, ringRadius, 0, Math.PI * 2);
-						ctx.stroke();
-						
-						// Add dissolving particles
-						const particleCount = 8;
-						for (let j = 0; j < particleCount; j++) {
-							const particleAngle = (j / particleCount) * Math.PI * 2;
-							const distance = ringRadius * (1 + progress);
-							const px = effect.x + Math.cos(particleAngle) * distance;
-							const py = effect.y + Math.sin(particleAngle) * distance;
-							
-							ctx.fillStyle = '#4169E1';
-							ctx.fillRect(px - 1, py - 1, 2, 2);
-						}
-					}
-					break;
-			}
-			ctx.restore();
-		});
-	}
+    collisionEffects.forEach(effect => {
+      // Calcul de l'âge de l'effet
+      const now = Date.now();
+      const age = now - effect.startTime;
+
+      // Durée selon le type "spawn" ou "expire"
+      const duration = effect.type.includes('spawn')
+        ? SPAWN_EFFECT_DURATION
+        : EXPIRE_EFFECT_DURATION;
+      
+      // progress brut
+      const rawProgress = age / duration;
+      // progress clampé entre 0 et 1
+      const progress = Math.max(0, Math.min(rawProgress, 1));
+
+      // Sauvegarde du contexte
+      ctx.save();
+
+      // On réduit l'alpha en fonction du progress
+      ctx.globalAlpha = Math.max(0, 1 - progress);
+
+      switch(effect.type) {
+
+        case 'paddle_collision': {
+          // Ripple effect
+          const rippleSize = Math.max(0, 20 + (progress * 40));
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 3 * (1 - progress);
+
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, rippleSize, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        }
+
+        case 'bumper_collision': {
+          // Explosion effect
+          const numParticles = 8;
+          // on clamp pour éviter radius négatif
+          const radius = Math.max(0, 30 * progress);
+
+          ctx.strokeStyle = '#4169E1';
+          ctx.lineWidth = 3 * (1 - progress);
+
+          for (let i = 0; i < numParticles; i++) {
+            const angle = (i / numParticles) * Math.PI * 2;
+            const startX = effect.x + Math.cos(angle) * 10;
+            const startY = effect.y + Math.sin(angle) * 10;
+            const endX = effect.x + Math.cos(angle) * radius;
+            const endY = effect.y + Math.sin(angle) * radius;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+          }
+          break;
+        }
+
+        case 'powerup_spawn': {
+          // Expanding circles with powerup color
+          ctx.strokeStyle = effect.color;
+          ctx.lineWidth = 2;
+
+          const circles = 3;
+          for (let i = 0; i < circles; i++) {
+            // On modifie légèrement progress pour chaque cercle
+            const circleProgress = (progress + (i / circles)) % 1;
+            const radius = Math.max(0, circleProgress * 40);
+
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+
+          // Add sparkles
+          const sparkles = 8;
+          for (let i = 0; i < sparkles; i++) {
+            const angle = (i / sparkles) * Math.PI * 2;
+            // clamp pour éviter tout souci
+            const sparkleDistance = Math.max(0, 20 + (progress * 20));
+
+            const x = effect.x + Math.cos(angle) * sparkleDistance;
+            const y = effect.y + Math.sin(angle) * sparkleDistance;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = effect.color;
+            ctx.fill();
+          }
+          break;
+        }
+
+        case 'powerup_expire': {
+          // Imploding effect
+          const fadeRadius = Math.max(0, 20 * (1 - progress));
+          ctx.strokeStyle = effect.color;
+          ctx.lineWidth = 2 * (1 - progress);
+
+          // Shrinking circle
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y, fadeRadius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Particles moving inward
+          const particles = 6;
+          for (let i = 0; i < particles; i++) {
+            const angle = (i / particles) * Math.PI * 2;
+            const distance = fadeRadius * 2; // base de départ
+            const x = effect.x + Math.cos(angle) * distance * progress;
+            const y = effect.y + Math.sin(angle) * distance * progress;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          break;
+        }
+
+        case 'bumper_spawn': {
+          // Expanding diamond pattern
+          ctx.strokeStyle = '#4169E1';
+          ctx.lineWidth = 2;
+          const size = Math.max(0, 40 * progress);
+          const rotation = progress * Math.PI;
+
+          // On translate/rotate le contexte avant de dessiner
+          ctx.translate(effect.x, effect.y);
+          ctx.rotate(rotation);
+
+          // Inner diamond
+          ctx.beginPath();
+          ctx.moveTo(0, -size);
+          ctx.lineTo(size, 0);
+          ctx.lineTo(0, size);
+          ctx.lineTo(-size, 0);
+          ctx.closePath();
+          ctx.stroke();
+
+          // Outer diamond
+          ctx.beginPath();
+          ctx.moveTo(0, -size * 1.5);
+          ctx.lineTo(size * 1.5, 0);
+          ctx.lineTo(0, size * 1.5);
+          ctx.lineTo(-size * 1.5, 0);
+          ctx.closePath();
+          ctx.stroke();
+          break;
+        }
+
+        case 'bumper_expire': {
+          // Dissolving rings effect
+          ctx.strokeStyle = '#4169E1';
+          ctx.lineWidth = 2 * (1 - progress);
+
+          const rings = 3;
+          for (let i = 0; i < rings; i++) {
+            const ringProgress = (progress + (i / rings)) % 1;
+            const ringRadius = Math.max(0, 20 * ringProgress);
+
+            ctx.beginPath();
+            ctx.arc(effect.x, effect.y, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Add dissolving particles
+            const particleCount = 8;
+            for (let j = 0; j < particleCount; j++) {
+              const particleAngle = (j / particleCount) * Math.PI * 2;
+              const distance = ringRadius * (1 + progress);
+              const px = effect.x + Math.cos(particleAngle) * distance;
+              const py = effect.y + Math.sin(particleAngle) * distance;
+
+              ctx.fillStyle = '#4169E1';
+              ctx.fillRect(px - 1, py - 1, 2, 2);
+            }
+          }
+          break;
+        }
+      }
+
+      ctx.restore();
+    });
+  }
 
 
 	function drawCountdown() {
@@ -678,13 +719,17 @@ if (isTouchDevice()) {
   
     // 4) Initialiser WebSocket
     const socket = new WebSocket(config.wsUrl);
+    // stocker le socket pour pouvoir le disconnect en cas de changement de page dans la spa
+    window.currentGameSocket = socket;
     
     socket.onopen = () => {
       ////console.log("[live_game_utils] WebSocket connection opened:", config.wsUrl);
       initializeTouchControls(config.userRole, socket);
     };
     socket.onclose = () => {
-      //console.log("[live_game_utils] WebSocket connection closed.");
+      console.log("[live_game_utils] WebSocket connection closed.");
+      socketClosed = true
+      resolve(); 
     };
   
     // 5) Gérer l'état du jeu local
@@ -708,14 +753,15 @@ if (isTouchDevice()) {
       bumpers: [],
       flash_effect: false
     };
-	// let showCountdown = false;
-    // let countdownNumber = 3;
-  
+	
     // 6) Gérer la réception de messages WebSocket
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
   
       if (data.type === 'game_state') {
+        // Réinitialiser le timer à chaque réception de gameState
+        resetInactivityTimer();
+
         // Mémoriser les effets actifs avant maj
         const prevLeft = new Set(activeEffects.left);
         const prevRight = new Set(activeEffects.right);

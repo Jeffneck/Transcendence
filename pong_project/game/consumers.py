@@ -5,11 +5,9 @@ import redis
 from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
 from uuid import UUID
-# from asgiref.sync import sync_to_async
 from game.tasks import stop_game
-# from game.models import GameSession
-
-# from .game_loop.redis_utils import get_key
+from channels.exceptions import DenyConnection
+from functools import wraps
 
 r = redis.Redis(
     host=settings.REDIS_HOST,
@@ -17,7 +15,17 @@ r = redis.Redis(
     db=0
 )
 
+def login_required_json_async(func):
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        print(f"[PongConsumer] check login async")
+        if not self.scope.get('user', None).is_authenticated:
+            raise DenyConnection("Utilisateur non authentifié")
+        return await func(self, *args, **kwargs)
+    return wrapper
+
 class PongConsumer(AsyncWebsocketConsumer):
+    @login_required_json_async
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.group_name = f"pong_{self.game_id}"
@@ -26,43 +34,64 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         print(f"[PongConsumer] WebSocket connected for game_id={self.game_id}")
 
-
-    # async def disconnect(self, close_code):
-    #     await self.channel_layer.group_discard(self.group_name, self.channel_name)
-    #     print(f"[PongConsumer] WebSocket disconnected for game_id={self.game_id}")
+    @login_required_json_async
     async def disconnect(self, close_code):
-        # Si vous décidez de tout annuler dès la première déconnexion :
+        # partie annullee dès la première déconnexion :
         print(f"[PongConsumer] => disconnect => stop_game({self.game_id})")
         await stop_game(self.game_id)  # Annule la task asyncio côté server
-
-        # Optionnel: marquer la session en "cancelled" en base
-        # await self.set_session_cancelled(self.game_id)
-
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-
-    # async def set_session_cancelled(self, game_id):
-    #     try:
-    #         session = await sync_to_async(GameSession.objects.get)(pk=game_id)
-    #         # Ne surécrivez le statut que si la partie n’est pas déjà finie
-    #         if session.status not in ('finished','cancelled'):
-    #             session.status = 'cancelled'
-    #             await sync_to_async(session.save)()
-    #     except GameSession.DoesNotExist:
-    #         pass
     
 
+    # async def receive(self, text_data=None, bytes_data=None):
+    #     data = json.loads(text_data)
+    #     action = data.get('action')
+    #     player = data.get('player')
+
+    #     if action == 'start_move':
+    #         direction = data.get('direction')  # 'up' ou 'down'
+    #         self.start_move_paddle(player, direction)
+
+    #     elif action == 'stop_move':
+    #         self.stop_move_paddle(player)
+    @login_required_json_async
     async def receive(self, text_data=None, bytes_data=None):
-        data = json.loads(text_data)
-        action = data.get('action')
-        player = data.get('player')
+        try:
+            # Tenter de charger le JSON
+            data = json.loads(text_data)
 
-        if action == 'start_move':
-            direction = data.get('direction')  # 'up' ou 'down'
-            self.start_move_paddle(player, direction)
+            # Vérifier si l'action est valide
+            action = data.get('action')
+            if action not in ['start_move', 'stop_move']:
+                # Si l'action n'est pas valide, l'ignorer
+                return
 
-        elif action == 'stop_move':
-            self.stop_move_paddle(player)
+            # Vérifier si le joueur est valide
+            player = data.get('player')
+            if player not in ['left', 'right']:
+                # Si le joueur n'est pas valide, l'ignorer
+                return
+
+            # Vérifier si la direction est présente et valide pour l'action 'start_move'
+            if action == 'start_move':
+                direction = data.get('direction')
+                if direction not in ['up', 'down']:
+                    # Si la direction n'est pas valide, l'ignorer
+                    return
+
+            # Si on est ici, cela signifie que les données sont valides
+            # Procéder à l'action en fonction de l'action (start_move ou stop_move)
+            if action == 'start_move':
+                self.start_move_paddle(player, direction)
+            elif action == 'stop_move':
+                self.stop_move_paddle(player)
+
+        except json.JSONDecodeError:
+            # Gérer les erreurs de décodage JSON si le JSON est mal formé
+            pass
+        except KeyError:
+            # Gérer les erreurs d'absence de clés nécessaires (ce cas devrait être évité grâce aux conditions ci-dessus)
+            pass
 
     def start_move_paddle(self, player, direction):
         velocity = 0

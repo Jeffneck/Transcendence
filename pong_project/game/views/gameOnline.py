@@ -69,6 +69,7 @@ class CreateGameOnlineView(View):
             # logger.exception("Error in CreateGameOnlineView: %s", e)
             return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
 
+#IMPROVE trouver un moyen pour supprimmer les anciennes invitations du meme joueur Checkinvitation peut aussi gerer ça 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
 class SendGameSessionInvitationView(View):
@@ -197,6 +198,40 @@ class CleanExpiredInvitationsView(View):
         except Exception as e:
             # logger.exception("Error in CleanExpiredInvitationsView: %s", e)
             return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+# added hugo
+class CleanDuplicateInvitationsView(View):
+    """
+    Marque comme 'expired' les invitations en duplicata provenant du même utilisateur (from_user),
+    en ne laissant intacte que la dernière invitation (la plus récente selon 'created_at').
+    Version compatible avec tous les SGBD.
+    """
+    def post(self, request):
+        try:
+            # On considère uniquement les invitations en attente.
+            pending_invitations = GameInvitation.objects.filter(status='pending')
+            
+            # Pour chaque utilisateur, on détermine l'invitation la plus récente.
+            latest_ids = []
+            from_user_ids = pending_invitations.values_list('from_user', flat=True).distinct()
+            for user_id in from_user_ids:
+                latest_inv = pending_invitations.filter(from_user=user_id).order_by('-created_at').first()
+                if latest_inv:
+                    latest_ids.append(latest_inv.id)
+            
+            # On met à jour toutes les invitations en attente qui ne sont pas les dernières pour chaque utilisateur.
+            updated_count = pending_invitations.exclude(id__in=latest_ids).update(status='expired')
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f"{updated_count} invitations en duplicata ont été marquées comme expired."
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': _('Erreur interne du serveur')
+            }, status=500)
+
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
