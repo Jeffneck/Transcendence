@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-20 08:00+0000\n"
+"POT-Creation-Date: 2025-02-11 07:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,36 +18,413 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: accounts/forms.py:58
-msgid "Choisir un fichier"
+#: accounts/forms.py:46 templates/accounts/burger_menu.html:2
+msgid "Nom d'utilisateur"
 msgstr ""
 
-#: accounts/forms.py:73
-msgid "L'image ne doit pas dépasser 4 Mo."
+#: accounts/forms.py:56
+msgid "Le nouveau nom d'utilisateur doit être différent de l'actuel."
+msgstr ""
+
+#: accounts/forms.py:59
+msgid ""
+"Le nom d'utilisateur ne doit contenir que des lettres, chiffres et "
+"underscores."
+msgstr ""
+
+#: accounts/forms.py:62
+msgid "Ce nom d'utilisateur est déjà pris."
+msgstr ""
+
+#: accounts/forms.py:64
+msgid "Le nom d'utilisateur ne peut pas être vide."
 msgstr ""
 
 #: accounts/forms.py:75
-msgid "Seules les images JPEG, PNG et GIF sont autorisées."
+msgid "Ancien mot de passe"
 msgstr ""
 
-#: templates/accounts/burger_menu.html:14
-msgid "En ligne"
+#: accounts/forms.py:80
+msgid "Nouveau mot de passe"
+msgstr ""
+
+#: accounts/forms.py:85
+msgid "Confirmez le nouveau mot de passe"
+msgstr ""
+
+#: accounts/forms.py:92
+msgid "Choisir un fichier"
+msgstr ""
+
+#: accounts/forms.py:106
+msgid "Aucun fichier n'a été téléchargé."
+msgstr ""
+
+#: accounts/forms.py:110
+msgid "L'image ne doit pas dépasser 4 Mo."
+msgstr ""
+
+#: accounts/forms.py:114
+msgid "Seules les images JPEG, JPG, PNG et GIF sont autorisées."
+msgstr ""
+
+#: accounts/forms.py:124
+msgid "Fichier image invalide ou corrompu."
+msgstr ""
+
+#: accounts/forms.py:133
+msgid "Entrez votre mot de passe"
+msgstr ""
+
+#: accounts/forms.py:144
+msgid "Mot de passe incorrect."
+msgstr ""
+
+#: accounts/views/burgerMenu.py:74
+msgid "Statut non valide"
+msgstr ""
+
+#: accounts/views/burgerMenu.py:81
+msgid "Statut mis à jour avec succès"
+msgstr ""
+
+#: accounts/views/friendProfile.py:92
+msgid "Erreur lors du chargement du profil de l'ami."
+msgstr ""
+
+#: accounts/views/login.py:57
+msgid "Nom d'utilisateur ou mot de passe invalide"
+msgstr ""
+
+#: accounts/views/login.py:96 game/views/gameHome.py:29
+#: game/views/gameLoading.py:28 game/views/gameLocal.py:189
+#: game/views/gameLocal.py:219 game/views/gameOnline.py:70
+#: game/views/gameOnline.py:131 game/views/gameOnline.py:168
+#: game/views/gameOnline.py:184 game/views/gameOnline.py:199
+#: game/views/gameOnline.py:254 game/views/gameOnline.py:284
+#: game/views/gameOnline.py:313 game/views/gameTournament.py:368
+#: game/views/gameTournament.py:381 game/views/gameTournament.py:416
+#: game/views/gameTournament.py:456 game/views/gameTournament.py:521
+#: game/views/gameTournament.py:544
+msgid "Erreur interne du serveur"
+msgstr ""
+
+#: accounts/views/login2fa.py:61
+msgid "Le 2FA est déjà activé sur votre compte."
+msgstr ""
+
+#: accounts/views/login2fa.py:86
+msgid "Une erreur est survenue lors de l'activation de 2FA."
+msgstr ""
+
+#: accounts/views/login2fa.py:103
+msgid "Aucune configuration 2FA en cours."
+msgstr ""
+
+#: accounts/views/login2fa.py:110 accounts/views/login2fa.py:186
+#: accounts/views/login2fa.py:263
+msgid "Un code est requis."
+msgstr ""
+
+#: accounts/views/login2fa.py:123
+msgid "Le 2FA a été activé avec succès."
+msgstr ""
+
+#: accounts/views/login2fa.py:128 accounts/views/login2fa.py:211
+#: accounts/views/login2fa.py:279
+msgid "Code 2FA invalide."
+msgstr ""
+
+#: accounts/views/login2fa.py:134 accounts/views/login2fa.py:217
+#: accounts/views/login2fa.py:285
+msgid "Une erreur inattendue est survenue."
+msgstr ""
+
+#: accounts/views/login2fa.py:164 accounts/views/login2fa.py:247
+msgid "Une erreur est survenue lors du rendu du formulaire."
+msgstr ""
+
+#: accounts/views/login2fa.py:178
+msgid "Accès non autorisé"
+msgstr ""
+
+#: accounts/views/login2fa.py:206
+msgid "2FA vérifié avec succès. Connexion réussie."
+msgstr ""
+
+#: accounts/views/login2fa.py:232 accounts/views/login2fa.py:256
+msgid "Le 2FA n'est pas activé sur votre compte."
+msgstr ""
+
+#: accounts/views/login2fa.py:274
+msgid "Le 2FA a été désactivé avec succès."
+msgstr ""
+
+#: accounts/views/logout.py:30
+msgid "Refresh token is required"
+msgstr "Le jeton d'actualisation est requis"
+
+#: accounts/views/logout.py:41
+msgid "Invalid refresh token"
+msgstr "Jeton d'actualisation invalide"
+
+#: accounts/views/logout.py:45
+msgid "Déconnexion réussie."
+msgstr ""
+
+#: accounts/views/manageFriends.py:39
+msgid "Nom d'utilisateur de l'ami manquant"
+msgstr ""
+
+#: accounts/views/manageFriends.py:47
+msgid "Ami introuvable"
+msgstr ""
+
+#: accounts/views/manageFriends.py:50
+msgid "Vous ne pouvez pas vous envoyer une demande d'ami à vous-même."
+msgstr ""
+
+#: accounts/views/manageFriends.py:80
+msgid "Vous êtes déjà ami avec cet utilisateur."
+msgstr ""
+
+#: accounts/views/manageFriends.py:85
+msgid "Demande d'ami déjà envoyée."
+msgstr ""
+
+#: accounts/views/manageFriends.py:89
+msgid "Cet utilisateur vous a déjà envoyé une demande d'ami."
+msgstr ""
+
+#: accounts/views/manageFriends.py:94
+msgid "Demande d'ami envoyée."
+msgstr ""
+
+#: accounts/views/manageFriends.py:123
+msgid "Demande d'ami acceptée"
+msgstr ""
+
+#: accounts/views/manageFriends.py:129
+msgid "Demande d'ami refusée"
+msgstr ""
+
+#: accounts/views/manageFriends.py:133
+msgid "Action non valide"
+msgstr ""
+
+#: accounts/views/manageFriends.py:137
+msgid "Erreur lors de la gestion de la demande d'ami"
+msgstr ""
+
+#: accounts/views/manageFriends.py:157
+msgid "Cet utilisateur n'est pas dans votre liste d'amis."
+msgstr ""
+
+#: accounts/views/manageFriends.py:164
+msgid "Ami supprimé avec succès."
+msgstr ""
+
+#: accounts/views/manageProfile.py:53
+msgid "Nom d'utilisateur mis à jour avec succès."
+msgstr ""
+
+#: accounts/views/manageProfile.py:80
+msgid "Votre compte a été supprimé avec succès."
+msgstr ""
+
+#: accounts/views/manageProfile.py:106
+msgid "Mot de passe mis à jour avec succès."
+msgstr ""
+
+#: accounts/views/manageProfile.py:131
+msgid "Avatar mis à jour avec succès."
+msgstr ""
+
+#: accounts/views/profile.py:85
+msgid "Une erreur est survenue lors du chargement du profil."
+msgstr ""
+
+#: accounts/views/register.py:48
+msgid "Inscription réussie."
+msgstr ""
+
+#: accounts/views/register.py:54
+msgid "Erreur interne du serveur."
+msgstr ""
+
+#: accounts/views/setLanguage.py:24
+msgid "Pas de langage spécifié."
+msgstr ""
+
+#: accounts/views/setLanguage.py:42
+msgid "Une erreur est survenue lors du changement de langue."
+msgstr ""
+
+#: game/forms.py:149
+msgid "Les noms des joueurs doivent être uniques."
+msgstr ""
+
+#: game/views/gameHome.py:33 game/views/gameLoading.py:32
+#: game/views/gameMenu.py:37
+msgid "Méthode non autorisée"
+msgstr ""
+
+#: game/views/gameLocal.py:156 game/views/gameTournament.py:363
+msgid "Mode non disponible pour le tactile"
+msgstr ""
+
+#: game/views/gameLocal.py:162
+msgid "Les paramètres du jeu sont invalides."
+msgstr ""
+
+#: game/views/gameLocal.py:202
+msgid "La partie en ligne ne peut pas être lancée avec cette API."
+msgstr ""
+
+#: game/views/gameLocal.py:216 game/views/gameStatus.py:25
+msgid "La session de jeu spécifiée n'existe pas."
+msgstr ""
+
+#: game/views/gameOnline.py:36
+msgid "Paramètres invalides."
+msgstr ""
+
+#: game/views/gameOnline.py:54
+msgid ""
+"Vous n'avez pas encore ajouté d'amis. Ajoutez des amis pour les inviter à "
+"jouer."
+msgstr ""
+
+#: game/views/gameOnline.py:64
+msgid "Partie en ligne créée avec succès."
+msgstr ""
+
+#: game/views/gameOnline.py:91
+msgid "Vous n'êtes pas autorisé à inviter pour cette session."
+msgstr ""
+
+#: game/views/gameOnline.py:98
+msgid "Ami introuvable."
+msgstr ""
+
+#: game/views/gameOnline.py:103
+msgid "Vous ne pouvez pas vous inviter vous-même."
+msgstr ""
+
+#: game/views/gameOnline.py:114
+msgid "Une invitation est déjà en attente pour cette session."
+msgstr ""
+
+#: game/views/gameOnline.py:126
+msgid "Invitation envoyée."
+msgstr ""
+
+#: game/views/gameOnline.py:145
+msgid "Cette invitation ne référence aucune session."
+msgstr ""
+
+#: game/views/gameOnline.py:147
+msgid "Un second joueur est déjà positionné sur cette session."
+msgstr ""
+
+#: game/views/gameOnline.py:158
+msgid "Invitation acceptée, session mise à jour."
+msgstr ""
+
+#: game/views/gameOnline.py:181
+msgid "Invitation refusée."
+msgstr ""
+
+#: game/views/gameOnline.py:211
+msgid "Vous n'êtes pas autorisé à consulter cette invitation."
+msgstr ""
+
+#: game/views/gameOnline.py:223
+msgid "Internal server error"
+msgstr ""
+
+#: game/views/gameOnline.py:235 game/views/gameOnline.py:267
+msgid "Cette session n'est pas une partie en ligne."
+msgstr ""
+
+#: game/views/gameOnline.py:237
+msgid "Vous n'êtes pas autorisé à rejoindre cette partie."
+msgstr ""
+
+#: game/views/gameOnline.py:239
+msgid "La partie est déjà lancée ou terminée."
+msgstr ""
+
+#: game/views/gameOnline.py:269
+msgid "Vous n'êtes pas autorisé à accéder à cette partie."
+msgstr ""
+
+#: game/views/gameOnline.py:295
+msgid "Rôle utilisateur invalide. Attendu 'left' ou 'right'."
+msgstr ""
+
+#: game/views/gameOnline.py:299
+msgid "La partie locale ne peut pas être lancée avec cette API."
+msgstr ""
+
+#: game/views/gameResults.py:93
+msgid "La session de jeu n'est pas terminée"
+msgstr ""
+
+#: game/views/gameResults.py:112
+msgid "La session de jeu demandée n'existe pas"
+msgstr ""
+
+#: game/views/gameResults.py:115
+msgid "Les résultats pour cette session de jeu ne sont pas disponibles"
+msgstr ""
+
+#: game/views/gameResults.py:118
+msgid "Une erreur est survenue lors de la récupération des résultats"
+msgstr ""
+
+#: game/views/gameTournament.py:375
+msgid "Formulaire invalide."
+msgstr ""
+
+#: game/views/gameTournament.py:469
+msgid "Ce tournoi ne dispose pas de TournamentParameters."
+msgstr ""
+
+#: game/views/gameTournament.py:482
+msgid "Impossible de créer la finale: gagnants non définis."
+msgstr ""
+
+#: game/views/gameTournament.py:533
+msgid "Cette session est en ligne, impossible de la lancer avec l'API locale."
+msgstr ""
+
+#: pong_project/decorators.py:12
+msgid "Utilisateur déjà connecté"
+msgstr ""
+
+#: pong_project/decorators.py:25
+msgid "Utilisateur non authentifié"
+msgstr ""
+
+#: pong_project/decorators.py:45
+msgid "Authentification partielle requise."
 msgstr ""
 
 #: templates/accounts/burger_menu.html:15
-msgid "Hors ligne"
+msgid "En ligne"
 msgstr ""
 
 #: templates/accounts/burger_menu.html:16
+msgid "Hors ligne"
+msgstr ""
+
+#: templates/accounts/burger_menu.html:17
 msgid "Voir le profil"
 msgstr ""
 
-#: templates/accounts/burger_menu.html:20
-msgid "Jouer"
-msgstr ""
-
 #: templates/accounts/burger_menu.html:21
-msgid "Tournoi"
+msgid "Jouer"
 msgstr ""
 
 #: templates/accounts/burger_menu.html:22
@@ -63,13 +440,13 @@ msgid "Ajouter"
 msgstr ""
 
 #: templates/accounts/burger_menu.html:39
-#: templates/accounts/friend_profile.html:39 templates/accounts/profile.html:40
+#: templates/accounts/friend_profile.html:61 templates/accounts/profile.html:61
 msgid "Amis"
 msgstr ""
 
 #: templates/accounts/burger_menu.html:50
-#: templates/accounts/burger_menu.html:73 templates/game/invite_game.html:21
-#: templates/game/invite_tournament.html:36
+#: templates/accounts/burger_menu.html:73
+#: templates/game/online_game/invite_game.html:21
 msgid "Aucun ami pour le moment."
 msgstr ""
 
@@ -119,13 +496,13 @@ msgstr ""
 msgid "Entrez le code généré par votre application d'authentification."
 msgstr ""
 
-#: templates/accounts/disable_2fa.html:12 templates/accounts/enable_2fa.html:26
+#: templates/accounts/disable_2fa.html:12 templates/accounts/enable_2fa.html:21
 #: templates/accounts/login2fa.html:13
 msgid "Code 2FA :"
 msgstr ""
 
 #: templates/accounts/disable_2fa.html:15
-#: templates/accounts/gestion_profil.html:92
+#: templates/accounts/gestion_profil.html:96
 msgid "Désactiver 2FA"
 msgstr ""
 
@@ -137,11 +514,7 @@ msgstr ""
 msgid "QR Code non disponible"
 msgstr ""
 
-#: templates/accounts/enable_2fa.html:20
-msgid "Code secret"
-msgstr ""
-
-#: templates/accounts/enable_2fa.html:35
+#: templates/accounts/enable_2fa.html:30
 msgid "Vérifier"
 msgstr ""
 
@@ -149,35 +522,63 @@ msgstr ""
 msgid "Profil de"
 msgstr ""
 
-#: templates/accounts/friend_profile.html:13 templates/accounts/profile.html:14
+#: templates/accounts/friend_profile.html:13 templates/accounts/profile.html:13
 msgid "Pseudo : "
 msgstr ""
 
-#: templates/accounts/friend_profile.html:14 templates/accounts/profile.html:15
+#: templates/accounts/friend_profile.html:14 templates/accounts/profile.html:14
 msgid "Nombre de matchs joués : "
 msgstr ""
 
-#: templates/accounts/friend_profile.html:25 templates/accounts/profile.html:26
+#: templates/accounts/friend_profile.html:25 templates/accounts/profile.html:25
 msgid "Statistiques Générales"
 msgstr ""
 
-#: templates/accounts/friend_profile.html:27 templates/accounts/profile.html:28
+#: templates/accounts/friend_profile.html:27 templates/accounts/profile.html:27
 msgid "Victoires : "
 msgstr ""
 
-#: templates/accounts/friend_profile.html:28 templates/accounts/profile.html:29
+#: templates/accounts/friend_profile.html:28 templates/accounts/profile.html:28
 msgid "Défaites : "
 msgstr ""
 
-#: templates/accounts/friend_profile.html:29 templates/accounts/profile.html:30
+#: templates/accounts/friend_profile.html:29 templates/accounts/profile.html:29
 msgid "Meilleur score : "
 msgstr ""
 
-#: templates/accounts/friend_profile.html:40 templates/accounts/profile.html:41
+#: templates/accounts/friend_profile.html:39 templates/accounts/profile.html:39
+msgid "Historique des Matchs"
+msgstr ""
+
+#: templates/accounts/friend_profile.html:44 templates/accounts/profile.html:44
+msgid "Adversaire : "
+msgstr ""
+
+#: templates/accounts/friend_profile.html:45 templates/accounts/profile.html:45
+msgid "Résultat : "
+msgstr ""
+
+#: templates/accounts/friend_profile.html:45 templates/accounts/profile.html:45
+msgid "Victoire"
+msgstr ""
+
+#: templates/accounts/friend_profile.html:45 templates/accounts/profile.html:45
+msgid "Défaite"
+msgstr ""
+
+#: templates/accounts/friend_profile.html:46 templates/accounts/profile.html:46
+msgid "Joué le : "
+msgstr ""
+
+#: templates/accounts/friend_profile.html:51 templates/accounts/profile.html:51
+msgid "Aucun match enregistré pour le moment."
+msgstr ""
+
+#: templates/accounts/friend_profile.html:62 templates/accounts/profile.html:62
 msgid "Nombre d'amis : "
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:4 templates/accounts/profile.html:50
+#: templates/accounts/gestion_profil.html:4 templates/accounts/profile.html:71
 msgid "Gestion de Profil"
 msgstr ""
 
@@ -185,56 +586,62 @@ msgstr ""
 msgid "Changer de langue"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:30
+#: templates/accounts/gestion_profil.html:27
 msgid "Changer d'avatar"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:37
-#: templates/accounts/gestion_profil.html:55
-#: templates/accounts/gestion_profil.html:75 templates/accounts/login.html:20
+#: templates/accounts/gestion_profil.html:34
+#: templates/accounts/gestion_profil.html:58
+#: templates/accounts/gestion_profil.html:79 templates/accounts/login.html:17
 #: templates/accounts/login2fa.html:16
 msgid "Valider"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:51
+#: templates/accounts/gestion_profil.html:48
 msgid "Changer de pseudo"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:69
+#: templates/accounts/gestion_profil.html:52
+msgid "Changer de pseudo entraînera une déconnexion automatique."
+msgstr ""
+
+#: templates/accounts/gestion_profil.html:73
 msgid "Changer de mot de passe"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:90
+#: templates/accounts/gestion_profil.html:94
 msgid "Authentification à deux facteurs"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:94
+#: templates/accounts/gestion_profil.html:98
 msgid "Activer 2FA"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:106
-#: templates/accounts/gestion_profil.html:119
+#: templates/accounts/gestion_profil.html:110
+#: templates/accounts/gestion_profil.html:123
 msgid "Supprimer le compte"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:107
+#: templates/accounts/gestion_profil.html:111
 msgid ""
 "Cette action est irréversible. Votre compte sera définitivement supprimé."
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:108
+#: templates/accounts/gestion_profil.html:112
 msgid "Supprimer mon compte"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:120
-msgid "Pour des raisons de sécurité, veuillez entrer votre mot de passe pour confirmer la suppression de votre compte."
+#: templates/accounts/gestion_profil.html:124
+msgid ""
+"Pour des raisons de sécurité, veuillez entrer votre mot de passe pour "
+"confirmer la suppression de votre compte."
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:124
+#: templates/accounts/gestion_profil.html:128
 msgid "Mot de passe"
 msgstr ""
 
-#: templates/accounts/gestion_profil.html:127
+#: templates/accounts/gestion_profil.html:131
 msgid "Confirmer la suppression"
 msgstr ""
 
@@ -250,19 +657,17 @@ msgstr ""
 msgid "Mot de passe :"
 msgstr ""
 
-#: templates/accounts/login.html:18
-msgid "Mot de passe oublié ?"
-msgstr ""
-
 #: templates/accounts/login2fa.html:7
 msgid "Entrez Code 2FA"
 msgstr ""
 
 #: templates/accounts/login2fa.html:9
-msgid "Pour vous connecter, veuillez saisir le code 2FA depuis votre application d'authentification"
+msgid ""
+"Pour vous connecter, veuillez saisir le code 2FA depuis votre application "
+"d'authentification"
 msgstr ""
 
-#: templates/accounts/profile.html:5
+#: templates/accounts/profile.html:4
 msgid "Profil Utilisateur"
 msgstr ""
 
@@ -291,89 +696,201 @@ msgid "Partie Locale"
 msgstr ""
 
 #: templates/game/gameMenu.html:13
-msgid "Inviter un Ami"
+msgid "Jouer en ligne"
 msgstr ""
 
-#: templates/game/gameMenu.html:21
-msgid "Modes de Jeu"
+#: templates/game/gameMenu.html:14
+msgid "Tournoi Local"
 msgstr ""
 
-#: templates/game/gameMenu.html:23
-msgid "Lancer Partie Standard"
+#: templates/game/game_results.html:6
+msgid "Résultats du jeu"
 msgstr ""
 
-#: templates/game/gameMenu.html:24
-msgid "Personnaliser Partie"
+#: templates/game/game_results.html:11
+msgid "Vainqueur"
 msgstr ""
 
-#: templates/game/gameMenu.html:33
-msgid "Personnalisation du Gameplay"
+#: templates/game/game_results.html:15
+msgid "Perdant"
 msgstr ""
 
-#: templates/game/gameMenu.html:37
-msgid "Vitesse de la Balle"
+#: templates/game/game_results.html:19
+msgid "Score"
 msgstr ""
 
-#: templates/game/gameMenu.html:43
-msgid "Taille de la Raquette"
-msgstr ""
-
-#: templates/game/gameMenu.html:45
-msgid "Petite"
-msgstr ""
-
-#: templates/game/gameMenu.html:46
-msgid "Moyenne"
-msgstr ""
-
-#: templates/game/gameMenu.html:47
-msgid "Grande"
-msgstr ""
-
-#: templates/game/gameMenu.html:51
-msgid "Selection des Bonus"
-msgstr ""
-
-#: templates/game/gameMenu.html:53
-msgid "**Power-Ups Légendaires !**"
-msgstr ""
-
-#: templates/game/gameMenu.html:93
-msgid "Lancer Partie Personnalisée"
-msgstr ""
-
-#: templates/game/gameSelectTournament.html:4
-msgid "Choisissez le nombre de participants"
-msgstr ""
-
-#: templates/game/gameSelectTournament.html:6
-msgid "Tournoi à 4 joueurs"
-msgstr ""
-
-#: templates/game/gameSelectTournament.html:7
-msgid "Tournoi à 8 joueurs"
-msgstr ""
-
-#: templates/game/invite_game.html:3
+#: templates/game/online_game/invite_game.html:3
 msgid "Invitez un ami"
 msgstr ""
 
-#: templates/game/invite_game.html:16 templates/game/invite_tournament.html:31
+#: templates/game/online_game/invite_game.html:16
 msgid "Inviter"
 msgstr ""
 
-#: templates/game/invite_game.html:28
+#: templates/game/online_game/invite_game.html:28
 msgid "Commencer"
 msgstr ""
 
-#: templates/game/invite_tournament.html:3
-msgid "Invitez vos amis"
+#: templates/game/online_game/invite_game.html:36
+msgid "Si vous quittez la page, la session actuelle sera supprimée."
 msgstr ""
 
-#: templates/game/invite_tournament.html:43
-msgid "Continuer"
+#: templates/game/online_game/invite_game.html:37
+msgid "Oui, quitter"
 msgstr ""
 
-#: templates/game/loading.html:43
+#: templates/game/online_game/invite_game.html:38
+msgid "Non, rester"
+msgstr ""
+
+#: templates/game/online_game/loading.html:12
+#: templates/partials/customization-section.html:52
+msgid "Obstacle en vue, esquive l’imprévu !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:16
+#: templates/partials/customization-section.html:56
+msgid "Accélère, file comme l'éclair !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:20
+#: templates/partials/customization-section.html:60
+msgid "Ridiculus ! rends le minus !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:24
+#: templates/partials/customization-section.html:64
+msgid "Fais les glisser, ils perdont pied !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:28
+#: templates/partials/customization-section.html:68
+msgid "Flash Attack, c'es lui qui crack !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:33
+#: templates/partials/customization-section.html:73
+msgid "Command Reverse, tu les renverses !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:37
+#: templates/partials/customization-section.html:77
+msgid "Canon Ball et c'est un goal !"
+msgstr ""
+
+#: templates/game/online_game/loading.html:45
 msgid "Chargement"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:5
+msgid "Sélectionner les joueurs"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:16
+#: templates/game/tournament/select_players.html:17
+msgid "Nom du Tournoi"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:21
+msgid "Nom du Joueur 1"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:22
+msgid "Joueur 1"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:25
+msgid "Nom du Joueur 2"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:26
+msgid "Joueur 2"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:29
+msgid "Nom du Joueur 3"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:30
+msgid "Joueur 3"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:33
+msgid "Nom du Joueur 4"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:34
+msgid "Joueur 4"
+msgstr ""
+
+#: templates/game/tournament/select_players.html:38
+msgid "Lancer le tournoi"
+msgstr ""
+
+#: templates/game/tournament/tournament_bracket.html:8
+msgid "Pong Championship"
+msgstr ""
+
+#: templates/game/tournament/tournament_bracket.html:9
+msgid "Le Premier match va commencer "
+msgstr ""
+
+#: templates/game/tournament/tournament_bracket.html:10
+msgid "Le Deuxième match va commencer"
+msgstr ""
+
+#: templates/game/tournament/tournament_bracket.html:11
+msgid "Place à la Finale"
+msgstr ""
+
+#: templates/game/tournament/tournament_bracket.html:12
+msgid "Le grand vainqueur est"
+msgstr ""
+
+#: templates/partials/customization-section.html:9
+msgid "Vitesse de la Balle"
+msgstr ""
+
+#: templates/partials/customization-section.html:11
+msgid "Lente"
+msgstr ""
+
+#: templates/partials/customization-section.html:12
+msgid "Normale"
+msgstr ""
+
+#: templates/partials/customization-section.html:13
+msgid "Rapide"
+msgstr ""
+
+#: templates/partials/customization-section.html:19
+msgid "Taille de la Raquette"
+msgstr ""
+
+#: templates/partials/customization-section.html:21
+msgid "Petite"
+msgstr ""
+
+#: templates/partials/customization-section.html:22
+msgid "Moyenne"
+msgstr ""
+
+#: templates/partials/customization-section.html:23
+msgid "Grande"
+msgstr ""
+
+#: templates/partials/customization-section.html:31
+msgid "Activer les obstacles !"
+msgstr ""
+
+#: templates/partials/customization-section.html:39
+msgid "Activer les bonus et malus !"
+msgstr ""
+
+#: templates/partials/customization-section.html:45
+msgid "Voir Tuto Bonus"
+msgstr ""
+
+#: templates/partials/customization-section.html:48
+msgid "**Power-Ups Légendaires !**"
 msgstr ""

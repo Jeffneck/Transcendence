@@ -58,7 +58,7 @@ class Enable2FAView(Base2FAView):
         if request.user.is_2fa_enabled:
             return JsonResponse({
                 'status': 'error',
-                'message': _("2FA is already enabled on your account.")
+                'message': _("Le 2FA est déjà activé sur votre compte.")
             }, status=400)
         try:
             # Generate a new secret and corresponding QR code
@@ -244,7 +244,7 @@ class Disable2FAView(View):
             # logger.exception("Error in Disable2FAView GET: %s", e)
             return JsonResponse({
                 'status': 'error',
-                'message': _("Une est survenue lors du rendu du formulaire.")
+                'message': _("Une erreur est survenue lors du rendu du formulaire.")
             }, status=500)
     
     @method_decorator(require_POST, name='dispatch')

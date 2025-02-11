@@ -78,4 +78,4 @@ class UpdateStatusView(View):
         user.save()
 
         # logger.info(f"Statut mis à jour pour {user.username}: {user.is_online}")
-        return JsonResponse({'status': 'success', 'message': _('Statut mis à jour avec succès'), _('is_online'): user.is_online})
+         return JsonResponse({'status': 'success', 'message': _('Statut mis à jour avec succès'), 'is_online': user.is_online})
