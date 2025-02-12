@@ -1,10 +1,12 @@
+// static/js/api/index.js
 "use strict";
+
 import { navigateTo } from '../router.js';
 import { HTTPError, ContentTypeError, NetworkError } from './apiErrors.js';
 import { showStatusMessage } from '../tools/displayInfo.js';
 import { clearSessionAndUI } from '../tools/clearSession.js';
 
-// Fonction utilitaire pour forcer la déconnexion de l'utilisateur
+// Déconnexion forcée de l'utilisateur en cas d'erreur critique
 function forceLogout(message) {
   showStatusMessage(message, "error");
   setTimeout(() => { clearSessionAndUI(); }, 1000);
@@ -12,47 +14,39 @@ function forceLogout(message) {
 
 const Api = {
   /**
-   * Fonction principale pour effectuer une requête HTTP.
-   * Vérifie et rafraîchit le token d'accès si nécessaire.
+   * Exécute une requête HTTP en gérant le rafraîchissement du token si nécessaire.
    */
   async request(url, method = "GET", formData = null, customHeaders = {}) {
     try {
-      // Prépare les headers (CSRF et Authorization)
       const headers = { ...this.prepareHeaders(), ...customHeaders };
 
-      // Vérifie si l’access token expire bientôt et tente de le rafraîchir
+      // Vérifie si l’access token expire dans moins de 5 minutes et tente de le rafraîchir
       const jwtAccessToken = this.getJWTaccessToken();
       if (jwtAccessToken && this.isTokenExpiringSoon(jwtAccessToken)) {
-        // console.warn("Access token sur le point d'expirer, tentative de rafraîchissement...");
         const newToken = await this.handleTokenRefresh();
         if (newToken) {
           headers["Authorization"] = `Bearer ${newToken}`;
         } else {
-          // Si le token ne peut pas être rafraîchi, on force la déconnexion
           forceLogout("Votre session a expiré, veuillez vous reconnecter.");
-          return; // Arrête l'exécution de la requête
+          return;
         }
       }
 
-      // Effectue la requête
       let response = await this.sendRequest(url, method, formData, headers);
 
-      // Gère les réponses 401 et 403
+      // Gestion des statuts 401 et 403
       if (response.status === 401) {
         const data = await response.json();
-        // Si le code d'erreur indique que l'utilisateur n'est pas authentifié, on se contente d'afficher le message d'erreur
         if (data.error_code === "not_authenticated") {
           showStatusMessage(data.message, "error");
           return;
-        }else if (data.error_code === "forbidden") {
+        } else if (data.error_code === "forbidden") {
           showStatusMessage(data.message, "error");
           navigateTo(data.redirect);
           return;
-        }
-        else if  (data.error_code === "token-error"){
+        } else if (data.error_code === "token-error") {
           response = await this.handleUnauthorized(url, method, formData, customHeaders);
-          
-        }else {
+        } else {
           showStatusMessage(data.message, "error");
           return;
         }
@@ -71,7 +65,6 @@ const Api = {
       if (error instanceof TypeError) {
         throw new NetworkError("Échec réseau : " + error.message);
       }
-      // En cas d'erreur 401, forcer la déconnexion
       if (error instanceof HTTPError && error.status === 401) {
         forceLogout(error.message || "Session expirée, reconnectez-vous.");
       }
@@ -79,9 +72,6 @@ const Api = {
     }
   },
 
-  /**
-   * Prépare les headers en incluant le token CSRF et, s’il existe, le token JWT.
-   */
   prepareHeaders() {
     const headers = {
       "X-CSRFToken": this.getCSRFToken(),
@@ -93,23 +83,16 @@ const Api = {
     return headers;
   },
 
-  /**
-   * Vérifie si le token expire dans moins de 5 minutes.
-   */
   isTokenExpiringSoon(token) {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const currentTime = Math.floor(Date.now() / 1000);
-      return payload.exp - currentTime < 300;
+      return (payload.exp - currentTime) < 300;
     } catch (error) {
-      // console.error("Erreur lors de la vérification de l'expiration du token :", error);
       return true;
     }
   },
 
-  /**
-   * Effectue la requête fetch avec la configuration fournie.
-   */
   async sendRequest(url, method, formData, headers) {
     return fetch(url, {
       method,
@@ -118,11 +101,7 @@ const Api = {
     });
   },
 
-  /**
-   * En cas d'erreur d'autorisation, tente de rafraîchir le token et réessaie la requête.
-   */
   async handleUnauthorized(url, method, formData, customHeaders) {
-    //console.warn("Accès non autorisé, tentative de rafraîchissement du token...");
     const newAccessToken = await this.handleTokenRefresh();
     if (newAccessToken) {
       const updatedHeaders = {
@@ -143,64 +122,45 @@ const Api = {
     }
   },
 
-  /**
-   * Rafraîchit le token d'accès en utilisant le refresh token.
-   */
   async handleTokenRefresh() {
     const jwtRefreshToken = this.getJWTrefreshToken();
     if (!jwtRefreshToken) {
-      //console.error("Aucun refresh token disponible.");
       return null;
     }
     try {
-      // Créez un FormData et ajoutez-y le refresh token
       const formData = new FormData();
       formData.append("refresh_token", jwtRefreshToken);
       
-        // Préparez les headers avec le token CSRF et, s'il existe, le token JWT
-      const headers = {
-        "X-CSRFToken": this.getCSRFToken()
-      };
+      const headers = { "X-CSRFToken": this.getCSRFToken() };
+      const jwtAccessToken = this.getJWTaccessToken();
+      if (jwtAccessToken) {
+        headers["Authorization"] = `Bearer ${jwtAccessToken}`;
+      }
 
-        const jwtAccessToken = this.getJWTaccessToken();
-        if (jwtAccessToken) {
-          headers["Authorization"] = `Bearer ${jwtAccessToken}`;
-        }
-
-  
-      // Effectuez la requête fetch directement sans passer par this.post()
       const response = await fetch("/accounts/refreshJwt/", {
         method: "POST",
         body: formData,
         headers,
       });
-  
+
       if (!response.ok) {
         forceLogout("Impossible de rafraîchir le token, veuillez vous reconnecter.");
-        //console.error("Erreur HTTP lors du rafraîchissement du token:", response.status, response.statusText);
         return null;
       }
-  
-      // Analysez la réponse JSON
+
       const data = await response.json();
-  
       if (data && data.access_token) {
         const newAccessToken = data.access_token;
         localStorage.setItem("access_token", newAccessToken);
         return newAccessToken;
       } else {
-        //console.error("Erreur lors du rafraîchissement du token:", data ? data.message : "Aucune réponse");
         return null;
       }
     } catch (error) {
-      //console.error("Échec du rafraîchissement du token :", error);
       return null;
     }
   },
 
-  /**
-   * Traite la réponse du serveur en fonction du Content-Type.
-   */
   async handleResponse(response) {
     const contentType = response.headers.get("Content-Type");
     if (response.ok && contentType && contentType.includes("application/json")) {
@@ -248,18 +208,15 @@ export async function requestGet(app, view) {
   try {
     return await Api.get(url);
   } catch (error) {
-    // console.error(`Erreur lors du chargement de ${app}-${view} :`, error);
     throw error;
   }
 }
 
 export async function requestPost(app, view, formData) {
   const url = `/${app}/${view}/`;
-  // console.debug("POST request URL:", url);
   try {
     return await Api.post(url, formData);
   } catch (error) {
-    // console.error(`Erreur lors du POST vers ${app}-${view} :`, error);
     throw error;
   }
 }
@@ -269,7 +226,6 @@ export async function requestDelete(app, view, resourceId) {
   try {
     return await Api.delete(url);
   } catch (error) {
-    // console.error(`Erreur lors de la suppression de ${app}-${view} avec ID ${resourceId} :`, error);
     throw error;
   }
 }

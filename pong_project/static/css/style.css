@@ -438,40 +438,6 @@ h1, h2, h3, h4, h5, h6 {
     color: #aaa;
 }
 
-/* .friend-btn {
-	border: 2px solid rgb(153, 148, 148);
-	background: none;
-	width: 100%;
-	color: white;
-	padding: 5px 10px;
-	border-radius: 50px;
-	cursor: pointer;
-}
-.friend-btn:hover {
-	background-color: rgba(255, 255, 255, 0.1);
-}
-
-.status-indicator {
-	position: absolute;
-	bottom: 10px;
-	right: 5px;
-	width: 15px;
-	height: 15px;
-	border-radius: 50%;
-	border: 2px solid white; 
-}
-.status-indicator-friend {
-	position: absolute;
-	bottom: 0px;
-	right: 20px;
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-	border: 2px solid white;
-} */
-
-
-
 .center-content {
 	height: 100% !important; /* Prend toute la hauteur de l'écran */
 	justify-content: center !important;

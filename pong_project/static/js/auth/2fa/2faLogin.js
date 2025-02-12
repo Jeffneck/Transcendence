@@ -1,4 +1,6 @@
+// static/js/2fa/login2fa.js
 "use strict";
+
 import { requestPost, requestGet } from '../../api/index.js';
 import { handleNavbar } from '../../navbar/index.js';
 import { updateHtmlContent, showStatusMessage } from '../../tools/index.js';
@@ -20,7 +22,7 @@ async function submitLogin2FA(form) {
       }, 500);
       showStatusMessage('Connexion 2FA réussie.', 'success');
     } else {
-      throw new Error(response.message || 'Code 2FA incorrect.');
+      showStatusMessage(response.message || 'Code 2FA incorrect.', 'error');
     }
   } catch (error) {
     console.error('Erreur lors de la soumission 2FA:', error);
@@ -32,6 +34,13 @@ export async function initializeLogin2FAView() {
   try {
     const data = await requestGet('accounts', '2fa/login2fa');
     updateHtmlContent('#content', data.html);
+    const login2faForm = document.getElementById('login-2fa-form');
+    if (login2faForm) {
+      login2faForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        submitLogin2FA(login2faForm);
+      });
+    }
   } catch (error) {
     if (error instanceof HTTPError && error.status === 403) {
       showStatusMessage('Vous êtes déjà connecté. Redirection...', 'error');
@@ -40,13 +49,5 @@ export async function initializeLogin2FAView() {
     }
     console.error('Erreur dans initializeLogin2FAView:', error);
     showStatusMessage('Impossible de charger la vue de connexion 2FA.', 'error');
-    return;
   }
-
-  document.addEventListener('submit', (e) => {
-    if (e.target && e.target.id === 'login-2fa-form') {
-      e.preventDefault();
-      submitLogin2FA(e.target);
-    }
-  });
 }

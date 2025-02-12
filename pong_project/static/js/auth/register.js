@@ -1,4 +1,5 @@
 "use strict";
+
 import { requestPost, requestGet } from '../api/index.js';
 import { updateHtmlContent, showStatusMessage } from '../tools/index.js';
 import { navigateTo } from '../router.js';
@@ -13,25 +14,6 @@ function handleRegisterResponse(response) {
   }
 }
 
-// async function submitRegistration(form) {
-//   const submitBtn = document.querySelector('#submit-btn');
-//   submitBtn.disabled = true;
-//   submitBtn.textContent = 'Inscription en cours...';
-//   const formData = new FormData(form);
-//   try {
-//     const response = await requestPost('accounts', 'submit_register', formData);
-//     // console.debug('Réponse POST submit_register :', response);
-//     handleRegisterResponse(response);
-//   } catch (error) {
-//     // console.error('Erreur lors de l\'inscription :', error);
-//     showStatusMessage('Erreur lors de l\'inscription. Veuillez réessayer.', 'error');
-//   } finally {
-//     submitBtn.disabled = false;
-//     submitBtn.textContent = 'S\'inscrire';
-//   }
-// }
-
-//modification pour retirer les console log et afficher le bon message (un utilisateur a le même nom, mauvais mot de passe)
 async function submitRegistration(form) {
   const submitBtn = document.querySelector('#submit-btn');
   submitBtn.disabled = true;
@@ -42,12 +24,9 @@ async function submitRegistration(form) {
     const response = await requestPost('accounts', 'submit_register', formData);
     handleRegisterResponse(response);
   } catch (error) {
-    // Vérifier si l'erreur est de type HTTPError (ou tout autre type que vous avez défini)
     if (error instanceof HTTPError) {
-      // Ici, error.message (ou un autre champ) contient le message retourné par le serveur.
       showStatusMessage(error.message, 'error');
     } else {
-      // Sinon, on affiche un message générique
       showStatusMessage('Erreur lors de l\'inscription. Veuillez réessayer.', 'error');
     }
   } finally {

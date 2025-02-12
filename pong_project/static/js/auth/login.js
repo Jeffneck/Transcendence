@@ -1,4 +1,5 @@
 "use strict";
+
 import { requestGet, requestPost } from '../api/index.js';
 import { handleNavbar } from '../navbar/index.js';
 import { updateHtmlContent, showStatusMessage } from '../tools/index.js';
@@ -10,6 +11,7 @@ async function handleLoginResponse(response) {
     if (response.requires_2fa) {
       navigateTo('/login-2fa');
     } else {
+      // Pour une sécurité accrue, envisagez d'utiliser un mécanisme de stockage plus sécurisé que le localStorage
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
       setTimeout(async () => {
@@ -30,7 +32,7 @@ async function submitLogin(form) {
   const formData = new FormData(form);
   try {
     const response = await requestPost('accounts', 'submit_login', formData);
-    console.debug('Réponse POST submit_login :', response);
+    console.debug('Response from submit_login:', response);
     return response;
   } catch (error) {
     console.error('Erreur lors de la connexion :', error);
@@ -72,6 +74,6 @@ export async function handleLogin() {
     await initializeLoginForm();
   } catch (error) {
     console.error('Erreur dans handleLogin :', error);
-    showStatusMessage('Erreur lors de l\'initialisation de la connexion.', 'error');
+    showStatusMessage("Erreur lors de l'initialisation de la connexion.", 'error');
   }
 }

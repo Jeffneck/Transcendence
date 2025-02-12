@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST, require_GET
 from django.template.loader import render_to_string
 from django.contrib.auth import authenticate, login
-from django.utils.translation import gettext as _  # Import pour la traduction
+from django.utils.translation import gettext as _
 
 from accounts.utils import generate_jwt_token
 from accounts.forms import LoginForm
@@ -15,23 +15,19 @@ from pong_project.decorators import user_not_authenticated
 
 logger = logging.getLogger(__name__)
 
-
 @method_decorator(user_not_authenticated, name='dispatch')
 @method_decorator(csrf_protect, name='dispatch')
 class LoginView(View):
     """
     Vue pour gérer la connexion utilisateur.
-    - GET  : Retourne le formulaire de connexion.
-    - POST : Traite la soumission du formulaire et authentifie l'utilisateur.
+      - GET  : Retourne le formulaire de connexion.
+      - POST : Traite la soumission du formulaire et authentifie l'utilisateur.
     """
     @method_decorator(require_GET)
     def get(self, request):
-        """
-        Affiche le formulaire de connexion.
-        Retourne un JSON contenant le HTML du formulaire.
-        """
         form = LoginForm()
-        rendered_form = render_to_string('accounts/login.html', {'form': form})
+        # On passe le contexte request pour permettre l'accès aux processors (ex: csrf_token)
+        rendered_form = render_to_string('accounts/login.html', {'form': form}, request=request)
         return JsonResponse({
             'status': 'success',
             'html': rendered_form,
@@ -39,9 +35,7 @@ class LoginView(View):
 
     @method_decorator(require_POST)
     def post(self, request):
-        # logger.debug("Début de la méthode POST de LoginView")
         form = LoginForm(request.POST)
-
         if not form.is_valid():
             return JsonResponse(
                 {'status': 'error', 'errors': form.errors},
@@ -51,14 +45,13 @@ class LoginView(View):
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
 
-        user = authenticate(request, username=username, password=password)
 
-        # Message d'erreur générique pour éviter l'énumération d'utilisateurs
+        # Verifier les informations d'authentification
+        user = authenticate(request, username=username, password=password)
         error_message = _("Nom d'utilisateur ou mot de passe invalide")
 
-        # Vérification de l'existence et de l'activité du compte
         if user is None or not user.is_active:
-            # logger.warning("Tentative d'authentification échouée pour l'utilisateur: %s", username)
+            logger.warning("Tentative d'authentification échouée pour l'utilisateur: %s", username)
             return JsonResponse(
                 {'status': 'error', 'message': error_message, 'error_code': 'not_authenticated'},
                 status=401
@@ -66,7 +59,7 @@ class LoginView(View):
 
         try:
             # Gestion de la 2FA
-            if getattr(user, 'is_2fa_enabled', False):
+            if user.is_2fa_enabled:
                 request.session['auth_partial'] = True
                 request.session['user_id'] = user.id
                 return JsonResponse(
@@ -77,9 +70,10 @@ class LoginView(View):
             # Génération des tokens JWT (access et refresh)
             token_jwt = generate_jwt_token(user)
 
-            # Mise à jour du statut de l'utilisateur et authentification
+            # Mise à jour du statut de l'utilisateur et connexion via Django
             user.is_online = True
-            user.save()
+            user.save(update_fields=['is_online'])
+            # Connexion de l'utilisateur
             login(request, user)
 
             response_data = {
@@ -91,7 +85,7 @@ class LoginView(View):
             }
             return JsonResponse(response_data, status=200)
         except Exception as e:
-            # logger.exception("Erreur lors de l'authentification pour l'utilisateur: %s", username)
+            logger.exception("Erreur lors de l'authentification pour l'utilisateur: %s", username)
             return JsonResponse(
                 {'status': 'error', 'message': _("Erreur interne du serveur")},
                 status=500
