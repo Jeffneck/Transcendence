@@ -1,5 +1,7 @@
 "use strict";
-export function toggleBurgerMenu(flag) {
+import { refreshBurgerMenu } from './loadNavbar.js';
+
+export async function toggleBurgerMenu(flag) {
   console.debug('toggleBurgerMenu appelé');
   const menu = document.getElementById('burger-menu');
   const overlay = document.getElementById('overlay');
@@ -12,9 +14,10 @@ export function toggleBurgerMenu(flag) {
   }
 }
 
-function openBurgerMenu(menu, overlay) {
+async function openBurgerMenu(menu, overlay) {
   menu.style.display = 'block';
   overlay.style.display = 'block';
+  await refreshBurgerMenu();
 }
 
 function closeBurgerMenu(menu, overlay) {

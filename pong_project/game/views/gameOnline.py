@@ -23,14 +23,13 @@ logger = logging.getLogger(__name__)
 @method_decorator(login_required_json, name='dispatch')
 class CreateGameOnlineView(View):
     """
-    Crée une session de jeu en ligne et renvoie la page d'invitation.
+    Crée une session de jeu en ligne et prépare l'invitation des amis.
     """
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         try:
             form = GameParametersForm(request.POST)
-            # logger.debug("Entering CreateGameOnlineView")
             if not form.is_valid():
-                # logger.warning("Invalid game parameters: %s", form.errors)
+                logger.warning("Paramètres du jeu en ligne invalides : %s", form.errors)
                 return JsonResponse({
                     'status': 'error',
                     'message': _("Paramètres invalides."),
@@ -46,7 +45,6 @@ class CreateGameOnlineView(View):
             parameters.game_session = session
             parameters.save()
             
-            # logger.info(f"Online GameSession {session.id} created by {request.user.username}")
             friends = request.user.friends.all()
             if not friends.exists():
                 return JsonResponse({
@@ -54,43 +52,44 @@ class CreateGameOnlineView(View):
                     'message': _("Vous n'avez pas encore ajouté d'amis. Ajoutez des amis pour les inviter à jouer.")
                 }, status=400)
             
-            rendered_html = render_to_string(
-                'game/online_game/invite_game.html',
-                {'game_id': session.id, 'friends': friends},
-                request=request
-            )
+            html = render_to_string('game/online_game/invite_game.html', {
+                'game_id': session.id,
+                'friends': friends
+            }, request=request)
+            logger.info("GameSession en ligne %s créée par %s.", session.id, request.user.username)
             return JsonResponse({
                 'status': 'success',
                 'message': _("Partie en ligne créée avec succès."),
                 'game_id': str(session.id),
-                'html': rendered_html
+                'html': html
             }, status=200)
         except Exception as e:
-            # logger.exception("Error in CreateGameOnlineView: %s", e)
-            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+            logger.exception("Erreur lors de la création de la partie en ligne : %s", e)
+            return JsonResponse({'status': 'error', 'message': _("Erreur interne du serveur")}, status=500)
 
-#IMPROVE trouver un moyen pour supprimmer les anciennes invitations du meme joueur Checkinvitation peut aussi gerer ça 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
 class SendGameSessionInvitationView(View):
     """
     Envoie une invitation pour une session de jeu en ligne.
     """
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         try:
             session_id = request.POST.get('session_id', '').strip()
             friend_username = request.POST.get('friend_username', '').strip()
             if not session_id or not friend_username:
                 return JsonResponse({
                     'status': 'error',
-                    'message': 'Données manquantes (session_id ou friend_username).'
+                    'message': _("Données manquantes (session_id ou friend_username).")
                 }, status=400)
+            
             session = get_object_or_404(GameSession, id=session_id, is_online=True)
             if session.player_left != request.user:
                 return JsonResponse({
                     'status': 'error',
                     'message': _("Vous n'êtes pas autorisé à inviter pour cette session.")
                 }, status=403)
+            
             try:
                 friend = CustomUser.objects.get(username=friend_username)
             except CustomUser.DoesNotExist:
@@ -98,38 +97,36 @@ class SendGameSessionInvitationView(View):
                     'status': 'error',
                     'message': _("Ami introuvable.")
                 }, status=404)
+            
             if friend == request.user:
                 return JsonResponse({
                     'status': 'error',
                     'message': _("Vous ne pouvez pas vous inviter vous-même.")
                 }, status=400)
-            existing_invitation = GameInvitation.objects.filter(
-                from_user=request.user,
-                to_user=friend,
-                session=session,
-                status='pending'
-            ).first()
-            if existing_invitation:
+            
+            if GameInvitation.objects.filter(from_user=request.user, to_user=friend, session=session, status='pending').exists():
                 return JsonResponse({
                     'status': 'error',
                     'message': _("Une invitation est déjà en attente pour cette session.")
                 }, status=400)
+            
             invitation = GameInvitation.objects.create(
                 from_user=request.user,
                 to_user=friend,
                 session=session,
                 status='pending'
             )
-            rendered_html = render_to_string('game/online_game/loading.html', request=request)
+            html = render_to_string('game/online_game/loading.html', request=request)
+            logger.info("Invitation %s envoyée de %s à %s pour la session %s.", invitation.id, request.user.username, friend.username, session.id)
             return JsonResponse({
                 'status': 'success',
-                'html': rendered_html,
+                'html': html,
                 'message': _('Invitation envoyée.'),
                 'invitation_id': invitation.id
             }, status=200)
         except Exception as e:
-            # logger.exception("Error in SendGameSessionInvitationView: %s", e)
-            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+            logger.exception("Erreur lors de l'envoi d'invitation pour la session en ligne : %s", e)
+            return JsonResponse({'status': 'error', 'message': _("Erreur interne du serveur")}, status=500)
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')

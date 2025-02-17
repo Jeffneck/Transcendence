@@ -1,6 +1,6 @@
 "use strict";
-import { requestPost } from '../api/api.js';
-import { handleDeleteAccount } from '../auth/index.js';
+import { clearSessionAndUI, showStatusMessage } from '../tools/index.js';
+import { requestPost } from '../api/index.js';
 import { navigateTo } from '../router.js';
 
 async function handleLanguageChange(language) {
@@ -26,24 +26,20 @@ export function attachProfileEvents() {
     enable2FABtn.addEventListener('click', () => navigateTo('/enable-2fa'));
     enable2FABtn.dataset.bound = true;
   }
-
   // Bouton Désactiver 2FA
   const disable2FABtn = document.querySelector('#disable-2fa-btn');
   if (disable2FABtn && !disable2FABtn.dataset.bound) {
     disable2FABtn.addEventListener('click', () => navigateTo('/disable-2fa'));
     disable2FABtn.dataset.bound = true;
   }
-
   // Bouton Supprimer le compte
   const deleteAccountBtn = document.querySelector('#delete-account-btn');
   if (deleteAccountBtn && !deleteAccountBtn.dataset.bound) {
-    deleteAccountBtn.addEventListener('click', handleDeleteAccount);
+    deleteAccountBtn.addEventListener('click', () => navigateTo('/delete-account'));
     deleteAccountBtn.dataset.bound = true;
   }
-
   // Boutons de langue
-  const languageButtons = document.querySelectorAll('button[data-lang]');
-  languageButtons.forEach((button) => {
+  document.querySelectorAll('button[data-lang]').forEach((button) => {
     if (!button.dataset.bound) {
       button.addEventListener('click', (event) => {
         event.preventDefault();

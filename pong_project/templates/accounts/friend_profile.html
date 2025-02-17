@@ -11,7 +11,7 @@
                     <img id="profile-avatar" src="{{ friend.avatar.url|default_if_none:'/media/avatars/default_avatar.png' }}" alt="Avatar" style="width: 120px; height: 120px;">
                     <div class="mt-3 w-100">
                         <h3 class="user-name">{% trans "Pseudo : " %}{{ friend.username }}</h3>
-                        <p class="mb-0">{% trans "Nombre de matchs joués : " %}<strong>{{ match_count|default:"N/A" }}</strong></p>
+                        <p class="mb-0">{% trans "Nombre de matchs joués : " %}<strong>{{ match_count }}</strong></p>
                     </div>
                 </div>
             </div>

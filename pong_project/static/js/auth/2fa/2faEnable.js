@@ -33,7 +33,7 @@ async function verification2FA(event) {
       showStatusMessage('2FA activée avec succès.', 'success');
       setTimeout(() => {
         navigateTo('/account');
-      }, 2000);
+      }, 1000);
     } else {
       showStatusMessage(response.message || 'Code 2FA incorrect.', 'error');
     }

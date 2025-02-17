@@ -22,6 +22,7 @@ async function removeFriend(friendName) {
 export async function handleRemoveFriend(friendName) {
   try {
     const response = await removeFriend(friendName);
+    // Suppression éventuelle de l'élément DOM associé
     const friendButtons = document.querySelectorAll('.friend-btn');
     friendButtons.forEach((button) => {
       if (button.textContent.includes(friendName)) {

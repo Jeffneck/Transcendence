@@ -6,13 +6,19 @@ import { initBurgerMenuDelegation } from './delegation.js';
 import { eventsHandlerBurgerMenu } from '../burgerMenu/index.js';
 import { navigateTo } from '../router.js';
 
+//improve utiliser un flag pour signaler un refresh du DOM dans cette fonction est peut être un peu maladroit
+//Utiliser une fonction du type refreshDOMButtons serait peut être une meilleure idee
 async function initializeBurgerMenu(flag) {
   const burgerToggle = document.querySelector('#burger-menu-toggle');
   if (burgerToggle && !burgerToggle.dataset.bound) {
-    burgerToggle.addEventListener('click', () => toggleBurgerMenu(flag));
+    burgerToggle.addEventListener('click', () => handleBurgerClick(flag));
     burgerToggle.dataset.bound = true;
     console.debug('Burger menu events initialisés.');
   }
+}
+
+async function handleBurgerClick(flag) {
+  await toggleBurgerMenu(flag);
 }
 
 function handleHomeButtonClick(isAuthenticated) {
@@ -86,7 +92,7 @@ export async function handleNavbar() {
       await initializeBurgerMenu(null);
       initBurgerMenuDelegation();
       eventsHandlerBurgerMenu();
-      setInterval(refreshBurgerMenu, 10000);
+      setInterval(refreshBurgerMenu, 30000);
     }
   } catch (error) {
     console.error('Erreur dans handleNavbar:', error);

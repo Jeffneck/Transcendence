@@ -7,31 +7,27 @@
 		<!-- Formulaire de sélection des joueurs -->
 		<div class="card bg-secondary">
 			<div class="card-body">
-				<!-- 
-					id="tournament-form" pour qu'on puisse faire `document.querySelector('#tournament-form')` en JS
-					name=... pour que Django reçoive ces champs dans request.POST 
-				-->
 				<form id="tournament-form">
 					<div class="mb-3">
-					<label for="tournament-name" class="form-label">{% trans "Nom du Tournoi" %}</label>
-					<input type="text" id="tournament-name" name="name" class="form-control" placeholder="{% trans 'Nom du Tournoi' %}" required>
+						<label for="tournament-name" class="form-label">{% trans "Nom du Tournoi" %}</label>
+						<input type="text" id="tournament-name" name="name" class="form-control" placeholder="{% trans 'Nom du Tournoi' %}" required>
 					</div>
 
 					<div class="mb-3">
-					<label for="player1" class="form-label">{% trans "Nom du Joueur 1" %}</label>
-					<input type="text" id="player1" name="player1" class="form-control" placeholder="{% trans 'Joueur 1'%}" required>
+						<label for="player1" class="form-label">{% trans "Nom du Joueur 1" %}</label>
+						<input type="text" id="player1" name="player1" class="form-control" placeholder="{% trans 'Joueur 1'%}" required>
 					</div>
 					<div class="mb-3">
-					<label for="player2" class="form-label">{% trans "Nom du Joueur 2" %}</label>
-					<input type="text" id="player2" name="player2" class="form-control" placeholder="{% trans 'Joueur 2'%}" required>
+						<label for="player2" class="form-label">{% trans "Nom du Joueur 2" %}</label>
+						<input type="text" id="player2" name="player2" class="form-control" placeholder="{% trans 'Joueur 2'%}" required>
 					</div>
 					<div class="mb-3">
-					<label for="player3" class="form-label">{% trans "Nom du Joueur 3" %}</label>
-					<input type="text" id="player3" name="player3" class="form-control" placeholder="{% trans 'Joueur 3'%}" required>
+						<label for="player3" class="form-label">{% trans "Nom du Joueur 3" %}</label>
+						<input type="text" id="player3" name="player3" class="form-control" placeholder="{% trans 'Joueur 3'%}" required>
 					</div>
 					<div class="mb-3">
-					<label for="player4" class="form-label">{% trans "Nom du Joueur 4" %}</label>
-					<input type="text" id="player4" name="player4" class="form-control" placeholder="{% trans 'Joueur 4'%}" required>
+						<label for="player4" class="form-label">{% trans "Nom du Joueur 4" %}</label>
+						<input type="text" id="player4" name="player4" class="form-control" placeholder="{% trans 'Joueur 4'%}" required>
 					</div>
 
 					<!-- Bouton de soumission -->
@@ -65,9 +61,12 @@
     min-width: 200px;
   }
   .form-control {
-    background-color: #2D3A52;
+    background-color: white !important;  /* Fond blanc */
     border: 1px solid rgb(153, 148, 148);
-    color: rgb(223, 216, 216);
+    color: black !important; /* Texte noir */
+  }
+  .form-control::placeholder {
+    color: #6c757d !important; /* Gris plus foncé pour être lisible */
   }
   .form-check-label {
     font-size: 1.1em;

@@ -1,0 +1,1296 @@
+# gameHome.py
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class GameHomeView(View):
+    """
+    View pour afficher la page d'accueil du jeu.
+    - GET: Retourne le HTML de la page de jeu.
+    - Autres méthodes: Retourne une erreur 405.
+    """
+    def get(self, request):
+        try:
+            # logger.debug("Handling GET request for GameHomeView")
+            rendered_html = render_to_string('game/gameHome.html', request=request)
+            return JsonResponse({'status': 'success', 'html': rendered_html}, status=200)
+        except Exception as e:
+            # logger.exception("Error in GameHomeView GET: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        # logger.warning(f"Méthode non autorisée : {request.method} pour GameHomeView")
+        return JsonResponse({'status': 'error', 'message': _('Méthode non autorisée')}, status=405)
+# gameLoading.py
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class LoadingView(View):
+    """
+    View pour afficher l'écran de chargement.
+    - GET: Retourne le HTML de l'écran de chargement.
+    - Autres méthodes: Retourne une erreur 405.
+    """
+    def get(self, request):
+        try:
+            # logger.debug("Handling GET request for LoadingView")
+            rendered_html = render_to_string('game/loading.html', request=request)
+            return JsonResponse({'status': 'success', 'html': rendered_html}, status=200)
+        except Exception as e:
+            # logger.exception("Error in LoadingView GET: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        # logger.warning(f"Méthode non autorisée : {request.method} pour LoadingView")
+        return JsonResponse({'status': 'error', 'message': _('Méthode non autorisée')}, status=405)
+# # game/views/gameLocal
+# # added (tout le fichier)
+# import logging
+# from django.views import View
+# from django.http import JsonResponse
+# from django.utils.decorators import method_decorator
+# from django.views.decorators.csrf import csrf_protect
+# from django.shortcuts import get_object_or_404
+# from django.template.loader import render_to_string
+# from game.models import GameSession
+# # import uuid
+# from game.forms import GameParametersForm
+
+# from game.manager import schedule_game  # Assurez-vous que vous avez un task qui gère le démarrage du jeu en background
+# from pong_project.decorators import login_required_json
+
+# # ---- Configuration ----
+# logger = logging.getLogger(__name__)
+
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class CreateGameLocalView(View):
+#     """
+#     Gère la création d'une nouvelle GameSession et des paramètres associés pour une partie locale.
+#     """
+#     def post(self, request):
+#         form = GameParametersForm(request.POST)
+#         logger.debug("Rentre dans CREATE GAME LOCAL")
+#         if not form.is_valid():
+#             # Renvoyer une réponse JSON en cas d'erreurs dans le formulaire
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': "Les paramètres du jeu sont invalides."
+#             })
+
+#         # Créer une nouvelle GameSession pour une partie locale
+#         session = GameSession.objects.create(status='waiting', is_online=False)
+#         logger.debug(session)
+#         # Assignation des noms des joueurs pour la partie locale (voir lacalGameForm dans form.py pour utiliser un formulaire plutot que des valeurs par defaut)
+#         player_left_local = "PLAYER 1"
+#         player_right_local = "PLAYER 2" 
+
+#         # Vérifier si les noms des joueurs sont fournis
+#         if player_left_local:
+#             session.player_left_local = player_left_local
+#         if player_right_local:
+#             session.player_right_local = player_right_local
+        
+#         session.save()
+
+#         # Créer les paramètres de jeu associés à cette session
+#         parameters = form.save(commit=False)
+#         parameters.game_session = session
+#         parameters.save()
+
+#         # Log de la création de la session de jeu
+#         logger.debug(f"[create_game] GameSession {session.id} créée pour {player_left_local} et {player_right_local} avec paramètres personnalisés.")
+#         # Retourner l'ID de la session et un message de succès dans la réponse JSON
+        
+
+#         context = {
+#             'player_left_name': player_left_local ,# default player 1
+#             'player_right_name': player_right_local # defaut player 2,
+#         }
+
+#         rendered_html = render_to_string('game/live_game.html', context)
+#         return JsonResponse({
+#             'status': 'success',
+#             'html' : rendered_html,
+#             'message': "Partie locale créée avec succès.",
+#             'game_id': str(session.id)
+#         }, status=201)
+
+# # lancee par l'appui sur le bouton Lancer la partie
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class StartLocalGameView(View):
+#     """
+#     Démarre la partie locale en exécutant la logique du jeu.
+#     """
+#     def post(self, request, game_id):
+#         try:
+#             # Récupérer la session de jeu par son ID
+#             session = GameSession.objects.get(id=game_id)
+#             print(f"[DEBUG] StartLocalGameView gameSession {session}")  # Debug
+
+#             # Vérifier que la session est une partie locale
+#             if session.is_online:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': "La partie en ligne ne peut pas être lancée avec cette API. Cette API sert à lancer une partie locale."
+#                 })
+
+#             # Vérifier que la partie n'est pas déjà en cours
+#             if session.status == 'running':
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': f"La partie {game_id} est déjà en cours."
+#                 })
+            
+#             # Vérifier que la partie n'est pas déjà terminée
+#             if session.status == 'finished':
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': f"La partie {game_id} est déjà terminée et ne peut pas être relancée."
+#                 })
+
+
+#             # Mettre la session en état "running"
+#             session.status = 'running'
+#             # le bouton a ete appuye ce qui signifie que les 2 joueurs sont prets (en local)
+#             session.ready_left = True
+#             session.ready_right = True
+#             session.save()
+
+#             schedule_game(game_id) 
+
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'message': f"Partie {game_id} lancée avec succès."
+#             })
+
+#         except GameSession.DoesNotExist:
+#             # print(f"[DEBUG] StartLocalGameView la gameSession n'existe pas")  # Debug
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': "La session de jeu spécifiée n'existe pas."
+#             })
+
+# gameLocal.py
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from django.template.loader import render_to_string
+from game.models import GameSession, GameParameters
+from game.forms import GameParametersForm
+from game.manager import schedule_game
+from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CreateGameLocalView(View):
+    """
+    Crée une nouvelle session de jeu locale avec ses paramètres.
+    """
+    def post(self, request):
+        try:
+            form = GameParametersForm(request.POST)
+            if request.POST.get('is_touch', 'false') == "true":
+                return JsonResponse({'status': 'error', 'message': _('Mode non disponible pour le tactile')}, status=403)
+
+
+            # logger.debug("Entering CreateGameLocalView")
+            if not form.is_valid():
+                # logger.warning("Invalid game parameters: %s", form.errors)
+                return JsonResponse({'status': 'error', 'message': _("Les paramètres du jeu sont invalides.")}, status=400)
+            
+            session = GameSession.objects.create(status='waiting', is_online=False)
+            # Valeurs par défaut pour une partie locale
+            player_left_local = "PLAYER 1"
+            player_right_local = "PLAYER 2"
+            session.player_left_local = player_left_local
+            session.player_right_local = player_right_local
+            session.save()
+            
+            parameters = form.save(commit=False)
+            parameters.game_session = session
+            parameters.save()
+            
+            # logger.info(f"GameSession {session.id} créée pour une partie locale.")
+            
+            context = {'player_left_name': player_left_local, 'player_right_name': player_right_local}
+            rendered_html = render_to_string('game/live_game.html', context, request=request)
+            
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'message': "Partie locale créée avec succès.",
+                'game_id': str(session.id)
+            }, status=201)
+        except Exception as e:
+            # logger.exception("Error in CreateGameLocalView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class StartLocalGameView(View):
+    """
+    Démarre une partie locale.
+    """
+    def post(self, request, game_id):
+        try:
+            session = GameSession.objects.get(id=game_id)
+            # logger.debug(f"StartLocalGameView - Session: {session}")
+            if session.is_online:
+                return JsonResponse({'status': 'error', 'message': _("La partie en ligne ne peut pas être lancée avec cette API.")}, status=400)
+            if session.status in ['running', 'finished']:
+                return JsonResponse({'status': 'error', 'message': _(f"La partie {game_id} est déjà lancée ou terminée.")}, status=400)
+            
+            session.status = 'running'
+            session.ready_left = True
+            session.ready_right = True
+            session.save()
+            
+            schedule_game(game_id)
+            
+            return JsonResponse({'status': 'success', 'message': _(f"Partie {game_id} lancée avec succès.")}, status=200)
+        except GameSession.DoesNotExist:
+            # logger.error(f"GameSession {game_id} does not exist.")
+            return JsonResponse({'status': 'error', 'message': _("La session de jeu spécifiée n'existe pas.")}, status=404)
+        except Exception as e:
+            # logger.exception("Error in StartLocalGameView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+# game/views.py
+
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from pong_project.decorators import login_required_json
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+from game.forms import GameParametersForm
+from game.models import GameSession
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class GameMenuView(View):
+
+    def get(self, request):
+        # logger.debug("Handling GET request for GameMenuView")
+
+        form = GameParametersForm()
+
+        rendered_html = render_to_string('game/gameMenu.html', {'form': form}, request)
+        return JsonResponse({
+            'status': 'success',
+            'html': rendered_html
+        })
+
+
+    def http_method_not_allowed(self, request, *args, **kwargs):
+        # logger.warning(f"Méthode non autorisée : {request.method} pour GameMenuView")
+        return JsonResponse({
+            'status': 'error',
+            'message': _('Méthode non autorisée')
+        }, status=405)
+
+
+
+
+# gameOnline.py
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from pong_project.decorators import login_required_json
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.utils.timezone import now
+from accounts.models import CustomUser
+from game.models import GameSession, GameInvitation
+from game.forms import GameParametersForm
+from game.manager import schedule_game
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CreateGameOnlineView(View):
+    """
+    Crée une session de jeu en ligne et renvoie la page d'invitation.
+    """
+    def post(self, request):
+        try:
+            form = GameParametersForm(request.POST)
+            # logger.debug("Entering CreateGameOnlineView")
+            if not form.is_valid():
+                # logger.warning("Invalid game parameters: %s", form.errors)
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Paramètres invalides."),
+                    'errors': form.errors
+                }, status=400)
+            
+            session = GameSession.objects.create(
+                status='waiting',
+                is_online=True,
+                player_left=request.user
+            )
+            parameters = form.save(commit=False)
+            parameters.game_session = session
+            parameters.save()
+            
+            # logger.info(f"Online GameSession {session.id} created by {request.user.username}")
+            friends = request.user.friends.all()
+            if not friends.exists():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Vous n'avez pas encore ajouté d'amis. Ajoutez des amis pour les inviter à jouer.")
+                }, status=400)
+            
+            rendered_html = render_to_string(
+                'game/online_game/invite_game.html',
+                {'game_id': session.id, 'friends': friends},
+                request=request
+            )
+            return JsonResponse({
+                'status': 'success',
+                'message': _("Partie en ligne créée avec succès."),
+                'game_id': str(session.id),
+                'html': rendered_html
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in CreateGameOnlineView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+#IMPROVE trouver un moyen pour supprimmer les anciennes invitations du meme joueur Checkinvitation peut aussi gerer ça 
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class SendGameSessionInvitationView(View):
+    """
+    Envoie une invitation pour une session de jeu en ligne.
+    """
+    def post(self, request):
+        try:
+            session_id = request.POST.get('session_id', '').strip()
+            friend_username = request.POST.get('friend_username', '').strip()
+            if not session_id or not friend_username:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Données manquantes (session_id ou friend_username).'
+                }, status=400)
+            session = get_object_or_404(GameSession, id=session_id, is_online=True)
+            if session.player_left != request.user:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Vous n'êtes pas autorisé à inviter pour cette session.")
+                }, status=403)
+            try:
+                friend = CustomUser.objects.get(username=friend_username)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Ami introuvable.")
+                }, status=404)
+            if friend == request.user:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Vous ne pouvez pas vous inviter vous-même.")
+                }, status=400)
+            existing_invitation = GameInvitation.objects.filter(
+                from_user=request.user,
+                to_user=friend,
+                session=session,
+                status='pending'
+            ).first()
+            if existing_invitation:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': _("Une invitation est déjà en attente pour cette session.")
+                }, status=400)
+            invitation = GameInvitation.objects.create(
+                from_user=request.user,
+                to_user=friend,
+                session=session,
+                status='pending'
+            )
+            rendered_html = render_to_string('game/online_game/loading.html', request=request)
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'message': _('Invitation envoyée.'),
+                'invitation_id': invitation.id
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in SendGameSessionInvitationView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class AcceptGameInvitationView(View):
+    """
+    Le joueur destinataire accepte une invitation et démarre la session.
+    """
+    def post(self, request, invitation_id):
+        try:
+            user = request.user
+            invitation = get_object_or_404(GameInvitation, id=invitation_id, to_user=user, status='pending')
+            session = invitation.session
+            if not session:
+                return JsonResponse({'status': 'error', 'message': _("Cette invitation ne référence aucune session.")}, status=400)
+            if session.player_right is not None:
+                return JsonResponse({'status': 'error', 'message': _("Un second joueur est déjà positionné sur cette session.")}, status=400)
+            if session.status != 'waiting':
+                return JsonResponse({'status': 'error', 'message': _(f"La session n'est pas en attente (status={session.status}).")}, status=400)
+            invitation.status = 'accepted'
+            invitation.save()
+            session.player_right = user
+            session.save()
+            schedule_game(session.id)
+            GameInvitation.objects.filter(session=session, status='pending').exclude(id=invitation.id).update(status='expired')
+            return JsonResponse({
+                'status': 'success',
+                'message': _('Invitation acceptée, session mise à jour.'),
+                'session': {
+                    'id': str(session.id),
+                    'player_left': session.player_left.username,
+                    'player_right': session.player_right.username,
+                    'status': session.status,
+                }
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in AcceptGameInvitationView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class RejectGameInvitationView(View):
+    """
+    Permet au destinataire de rejeter une invitation.
+    """
+    def post(self, request, invitation_id):
+        try:
+            invitation = get_object_or_404(GameInvitation, id=invitation_id, to_user=request.user, status='pending')
+            invitation.status = 'rejected'
+            invitation.save()
+            return JsonResponse({'status': 'success', 'message': _("Invitation refusée.")}, status=200)
+        except Exception as e:
+            # logger.exception("Error in RejectGameInvitationView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CleanExpiredInvitationsView(View):
+    """
+    Marque les invitations expirées comme 'expired'.
+    """
+    def post(self, request):
+        try:
+            current_time = now()
+            expired_count = GameInvitation.objects.filter(status='pending', expires_at__lt=current_time).update(status='expired')
+            return JsonResponse({'status': 'success', 'message': f"{expired_count} invitations ont été expirées."}, status=200)
+        except Exception as e:
+            # logger.exception("Error in CleanExpiredInvitationsView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+# added hugo
+class CleanDuplicateInvitationsView(View):
+    """
+    Marque comme 'expired' les invitations en duplicata provenant du même utilisateur (from_user),
+    en ne laissant intacte que la dernière invitation (la plus récente selon 'created_at').
+    Version compatible avec tous les SGBD.
+    """
+    def post(self, request):
+        try:
+            # On considère uniquement les invitations en attente.
+            pending_invitations = GameInvitation.objects.filter(status='pending')
+            
+            # Pour chaque utilisateur, on détermine l'invitation la plus récente.
+            latest_ids = []
+            from_user_ids = pending_invitations.values_list('from_user', flat=True).distinct()
+            for user_id in from_user_ids:
+                latest_inv = pending_invitations.filter(from_user=user_id).order_by('-created_at').first()
+                if latest_inv:
+                    latest_ids.append(latest_inv.id)
+            
+            # On met à jour toutes les invitations en attente qui ne sont pas les dernières pour chaque utilisateur.
+            updated_count = pending_invitations.exclude(id__in=latest_ids).update(status='expired')
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f"{updated_count} invitations en duplicata ont été marquées comme expired."
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': _('Erreur interne du serveur')
+            }, status=500)
+
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CheckGameInvitationStatusView(View):
+    """
+    Retourne le statut actuel d'une invitation.
+    """
+    def get(self, request, invitation_id):
+        try:
+            invitation = get_object_or_404(GameInvitation, id=invitation_id)
+            if invitation.from_user != request.user and invitation.to_user != request.user:
+                return JsonResponse({'status': 'error', 'message': _("Vous n'êtes pas autorisé à consulter cette invitation.")}, status=403)
+            if invitation.is_expired() and invitation.status == 'pending':
+                invitation.status = 'expired'
+                invitation.save()
+            return JsonResponse({
+                'status': 'success',
+                'invitation_status': invitation.status,
+                'expired': invitation.is_expired(),
+                'session_id': str(invitation.session.id) if invitation.session else None
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in CheckGameInvitationStatusView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Internal server error')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+# class StartOnlineGameView(LoginRequiredMixin, View):
+class JoinOnlineGameAsLeftView(View):
+    
+    def post(self, request, game_id):
+        try:
+            # logger.debug("JoinOnlineGameAsLeftView")
+            session = get_object_or_404(GameSession, id=game_id)
+            if not session.is_online:
+                return JsonResponse({'status': 'error', 'message': _("Cette session n'est pas une partie en ligne.")}, status=400)
+            if request.user not in [session.player_left, session.player_right]:
+                return JsonResponse({'status': 'error', 'message': _("Vous n'êtes pas autorisé à rejoindre cette partie.")}, status=403)
+            if session.status in ['running', 'finished']:
+                return JsonResponse({'status': 'error', 'message': _("La partie est déjà lancée ou terminée.")}, status=400)
+            context = {
+                'player_left_name': session.player_left.get_username(),
+                'player_right_name': session.player_right.get_username(),
+            }
+    
+            rendered_html = render_to_string('game/live_game.html', context, request=request)
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'game_id': str(session.id),
+                'message': f"Partie {game_id} rejointe (online)."
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in JoinOnlineGameAsLeftView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class JoinOnlineGameAsRightView(View):
+    """
+    Démarre la partie en ligne pour le joueur droit.
+    """
+    def post(self, request, game_id):
+        try:
+            # logger.debug("JoinOnlineGameAsRightView")
+            session = get_object_or_404(GameSession, id=game_id)
+            if not session.is_online:
+                return JsonResponse({'status': 'error', 'message': _("Cette session n'est pas une partie en ligne.")}, status=400)
+            if request.user not in [session.player_left, session.player_right]:
+                return JsonResponse({'status': 'error', 'message': _("Vous n'êtes pas autorisé à accéder à cette partie.")}, status=403)
+            context = {
+                'player_left_name': session.player_left.get_username(),
+                'player_right_name': session.player_right.get_username(),
+            }
+            
+            rendered_html = render_to_string('game/live_game.html', context, request=request)
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'game_id': str(session.id),
+                'message': _(f"Partie {game_id} lancée (online).")
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in JoinOnlineGameAsRightView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+class StartOnlineGameView(View):
+    """
+    Démarre une partie en ligne.
+    """
+    def post(self, request, game_id):
+        try:
+            user_role = request.POST.get('userRole')
+            if user_role not in ['left', 'right']:
+                return JsonResponse({'status': 'error', 'message': _("Rôle utilisateur invalide. Attendu 'left' ou 'right'.")}, status=400)
+            session = get_object_or_404(GameSession, id=game_id)
+            # logger.debug(f"StartOnlineGameView - Session: {session}")
+            if not session.is_online:
+                return JsonResponse({'status': 'error', 'message': _("La partie locale ne peut pas être lancée avec cette API.")}, status=400)
+            if session.status == 'finished':
+                return JsonResponse({'status': 'error', 'message': _(f"La partie {game_id} est déjà terminée.")}, status=400)
+            if user_role == "right":
+                session.ready_right = True
+            elif user_role == "left":
+                session.ready_left = True
+            if session.ready_right and session.ready_left:
+                session.status = 'running'
+            session.save()
+            # logger.debug(f"StartOnlineGameView - Ready: {session.ready_left}-{session.ready_right}")
+            return JsonResponse({'status': 'success', 'message': _(f"Partie {game_id} prête pour le joueur {user_role}.")}, status=200)
+        except Exception as e:
+            # logger.exception("Error in StartOnlineGameView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+# gameResults.py
+import logging
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from game.models import GameSession, GameResult
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+class GameResultsView(View):
+    """
+    Affiche les résultats de la partie.
+    """
+    def get(self, request, game_id):
+        try:
+            session = GameSession.objects.get(id=game_id)
+            if session.status != 'finished':
+                # logger.error("La session n'est pas terminée.")
+                return JsonResponse({'status': 'error', 'message': _("La session de jeu n'est pas terminée")}, status=401)
+            results = get_object_or_404(GameResult, game=session)
+            rendered_html = render_to_string('game/game_results.html', {
+                'game_id': session.id,
+                'winner': results.winner_local if results.winner_local else results.winner.username,
+                'looser': results.looser_local if results.looser_local else results.looser.username,
+                'score_left': results.score_left,
+                'score_right': results.score_right,
+            }, request=request)
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'winner': results.winner_local if results.winner_local else results.winner.username,
+                'looser': results.looser_local if results.looser_local else results.looser.username,
+                'score_left': results.score_left,
+                'score_right': results.score_right,
+            })
+        except GameSession.DoesNotExist:
+            # logger.error("Session de jeu non trouvée.")
+            return JsonResponse({'status': 'error', 'message': _("La session de jeu demandée n'existe pas")}, status=404)
+        except GameResult.DoesNotExist:
+            # logger.error("Résultats non trouvés pour la session.")
+            return JsonResponse({'status': 'error', 'message': _("Les résultats pour cette session de jeu ne sont pas disponibles")}, status=404)
+        except Exception as e:
+            # logger.exception("Error in GameResultsView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _("Une erreur est survenue lors de la récupération des résultats")}, status=500)
+# game/views/gameStatus
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from game.models import GameSession
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+from pong_project.decorators import login_required_json
+
+# ---- Configuration ----
+logger = logging.getLogger(__name__)
+
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class GetGameStatusView(View):
+    def get(self, request, game_id):
+        try:
+            session = GameSession.objects.get(id=game_id)
+        except GameSession.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': _("La session de jeu spécifiée n'existe pas.")
+            }, status=404)
+
+        return JsonResponse({
+            'status': 'success',
+            'session_status': session.status 
+        }, status=200)# # game/views/tournamentLocal.py
+
+# import logging
+# from django.views import View
+# from django.http import JsonResponse
+# from django.utils.decorators import method_decorator
+# from django.views.decorators.csrf import csrf_protect
+# from django.template.loader import render_to_string
+# from django.shortcuts import get_object_or_404
+# from django.templatetags.static import static  
+# from pong_project.decorators import login_required_json
+
+# from game.forms import TournamentParametersForm
+# from game.models import (
+#     LocalTournament, 
+#     GameSession, 
+#     GameParameters
+# )
+# from game.manager import schedule_game
+
+# logger = logging.getLogger(__name__)
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class CreateTournamentView(View):
+#     """
+#     Gère l'affichage (GET) du formulaire de création de tournoi,
+#     et la création (POST) d'un nouveau LocalTournament.
+#     """
+#     def get(self, request):
+#         # Crée un formulaire basé sur TournamentParametersForm
+#         form = TournamentParametersForm()
+        
+#         # On rend un template HTML qui contient un <form> 
+#         # (par exemple : 'game/tournament/select_players.html')
+#         rendered_html = render_to_string(
+#             'game/tournament/select_players.html',
+#             {'form': form},
+#             request=request
+#         )
+        
+#         return JsonResponse({
+#             'status': 'success',
+#             'html': rendered_html,
+#         })
+    
+#     def post(self, request):
+#         # On récupère les données envoyées par le front
+#         form = TournamentParametersForm(request.POST)
+        
+#         if not form.is_valid():
+#             logger.debug("FORM INVALIDE CREATE TOURNAMENT")
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': 'Formulaire invalide.',
+#                 'errors': form.errors,
+#             }, status=400)
+        
+#         # Sauvegarde en BDD du LocalTournament + TournamentParameters (via le form)
+#         tournament = form.save()
+#         logger.debug(f"[CreateTournamentView] Tournoi {tournament.id} créé avec succès.")
+        
+#         return JsonResponse({
+#             'status': 'success',
+#             'tournament_id': str(tournament.id),
+#             'message': f"Tournoi {tournament.name} créé avec succès.",
+#         }, status=201)
+
+
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class TournamentBracketView(View):
+#     """
+#     Récupère l'état (status) du tournoi + le bracket (HTML).
+#     Correspond à GET /game/tournament_bracket/<tournament_id>.
+#     """
+#     def get(self, request, tournament_id):
+#         tournament = get_object_or_404(LocalTournament, id=tournament_id)
+
+#         # Par exemple, status peut être "pending", "semifinal1_in_progress", "finished", etc.
+#         status = tournament.status
+
+#         # Construction du dictionnaire des avatars avec des URLs statiques résolues
+#         player_avatars = {
+#             tournament.player1: static('svg/astronaut_gang.svg'),
+#             tournament.player2: static('svg/shark_dumbble.svg'),
+#             tournament.player3: static('svg/monkey_money.svg'),
+#             tournament.player4: static('svg/death_bath.svg'),
+#         }
+
+#         # Contexte minimal pour afficher le bracket (les gagnants, le status, etc.)
+#         tournament_context = {
+#             'tournament_status': status,
+#         }
+
+#         # Injection du contexte dans le template (ici, par exemple, "tournament_bracket.html")
+#         rendered_html = render_to_string('game/tournament/tournament_bracket.html')
+
+#         return JsonResponse({
+#             'status': 'success',
+#             'html': rendered_html,
+#             'tournament_status': status,
+#             'tournament_name': tournament.name,
+#             'player1': tournament.player1,
+#             'player2': tournament.player2,
+#             'player3': tournament.player3,
+#             'player4': tournament.player4,
+#             'winner_semifinal_1': tournament.winner_semifinal_1,
+#             'winner_semifinal_2': tournament.winner_semifinal_2,
+#             'winner_final': tournament.winner_final,
+#             'player_avatars': player_avatars,  # Envoi des URLs résolues
+#         }, status=200)
+
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class TournamentNextGameView(View):
+#     """
+#     Renvoie (en GET) le prochain match à jouer: ex. "semifinal1", "semifinal2", "final", ou "finished".
+#     Correspond à GET /game/tournament_next_game/<tournament_id>.
+#     """
+#     def get(self, request, tournament_id):
+#         tournament = get_object_or_404(LocalTournament, id=tournament_id)
+#         tournament_status = tournament.status
+#         logger.error(tournament_status)
+#         # Si le tournoi est déjà fini, on renvoie quelque chose d'explicite
+#         if tournament_status == "finished":
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'html': "<p>Le tournoi est terminé !</p>",
+#                 'next_match_type': 'finished',
+#             }, status=200)
+
+#         # Mapping logique interne: 
+#         match_mapping = {
+#             'pending': 'semifinal1',
+#             'semifinal1_done': 'semifinal2',
+#             'semifinal2_done': 'final',
+#         }
+#         next_match_type = match_mapping.get(tournament_status, None)
+#         logger.error(next_match_type)
+#         if not next_match_type:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f"Type de match invalide ou introuvable pour le statut : {tournament_status}",
+#             }, status=400)
+        
+#         if next_match_type == 'finished':
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'html': "<p>Le tournoi est terminé !</p>",
+#                 'next_match_type': 'finished',
+#             }, status=200)
+        
+#         # En fonction du match, on détermine les joueurs "left" / "right"
+#         if next_match_type == 'semifinal1':
+#             player_left = tournament.player1
+#             player_right = tournament.player2
+#         elif next_match_type == 'semifinal2':
+#             player_left = tournament.player3
+#             player_right = tournament.player4
+#         elif next_match_type == 'final':
+#             # On récupère les gagnants des 2 demi-finales
+#             player_left = tournament.winner_semifinal_1 
+#             player_right = tournament.winner_semifinal_2
+#         else:
+#             player_left, player_right = "???", "???"
+        
+#         # Contexte pour votre template
+#         next_game_context = {
+#             'next_match_type': next_match_type,
+#             'player_left': player_left,
+#             'player_right': player_right,
+#         }
+        
+#         rendered_html = render_to_string(
+#             'game/tournament/tournament_next_game.html',
+#             next_game_context,
+#             request=request
+#         )
+        
+#         return JsonResponse({
+#             'status': 'success',
+#             'html': rendered_html,
+#             'next_match_type': next_match_type,
+#         }, status=200)
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class CreateTournamentGameSessionView(View):
+#     """
+#     Crée une GameSession (semifinal1, semifinal2 ou final) pour le tournoi <tournament_id>.
+#     Copy les TournamentParameters -> GameParameters.
+#     Correspond à POST /game/create_tournament_game_session/<tournament_id>.
+#     """
+#     def post(self, request, tournament_id):
+#         tournament = get_object_or_404(LocalTournament, id=tournament_id)
+        
+#         # Le front nous envoie next_match_type (ex: semifinal1, semifinal2, final)
+#         next_match_type = request.POST.get('next_match_type')
+        
+#         if not tournament.parameters:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': "Ce tournoi ne dispose pas de TournamentParameters.",
+#             }, status=400)
+
+#         # On choisit quels joueurs se retrouvent en left / right
+#         if next_match_type == 'semifinal1':
+#             player_left_local = tournament.player1
+#             player_right_local = tournament.player2
+#             tournament.status = 'semifinal1_in_progress'
+#         elif next_match_type == 'semifinal2':
+#             player_left_local = tournament.player3
+#             player_right_local = tournament.player4
+#             tournament.status = 'semifinal2_in_progress'
+#         elif next_match_type == 'final':
+#             # On suppose que winner_semifinal_1 / _2 sont déjà set
+#             player_left_local = tournament.winner_semifinal_1
+#             player_right_local = tournament.winner_semifinal_2
+#             if not player_left_local or not player_right_local:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': "Impossible de créer la finale: gagnants des demi-finales non définis.",
+#                 }, status=400)
+#             tournament.status = 'final_in_progress'
+#         else:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f"Type de match invalide: {next_match_type}",
+#             }, status=400)
+        
+#         # Création de la GameSession "local" (pas online) 
+#         game_session = GameSession.objects.create(
+#             status='waiting',
+#             is_online=False,
+#             player_left_local=player_left_local,
+#             player_right_local=player_right_local,
+#             tournament_id=str(tournament.id)  # On stocke l'id du tournoi
+#         )
+
+#         # Copier params du LocalTournament vers la GameSession
+#         tparams = tournament.parameters
+#         GameParameters.objects.create(
+#             game_session=game_session,
+#             ball_speed=tparams.ball_speed,
+#             paddle_size=tparams.paddle_size,
+#             bonus_enabled=tparams.bonus_enabled,
+#             obstacles_enabled=tparams.obstacles_enabled,
+#         )
+
+#         # On relie la GameSession à la bonne clé dans LocalTournament
+#         if next_match_type == 'semifinal1':
+#             tournament.semifinal1 = game_session
+#         elif next_match_type == 'semifinal2':
+#             tournament.semifinal2 = game_session
+#         else:  # final
+#             tournament.final = game_session
+        
+#         tournament.save()
+
+#         logger.debug(f"[CreateTournamentGameSessionView] Crée GameSession {game_session.id} pour {next_match_type}.")
+
+#         # Optionnel: un snippet HTML à injecter (par ex. un canvas de jeu, etc.)
+#         context = {
+#             'player_left_name': player_left_local ,# default player 1
+#             'player_right_name': player_right_local # defaut player 2,
+#         }
+#         rendered_html = render_to_string(
+#             'game/live_game.html',
+#             context
+#         )
+
+#         return JsonResponse({
+#             'status': 'success',
+#             'message': f"{next_match_type} créée pour le tournoi {tournament.name}.",
+#             'game_id': str(game_session.id),
+#             'html': rendered_html,
+#             'tournament_status': tournament.status,
+#         }, status=201)
+
+# @method_decorator(csrf_protect, name='dispatch')
+# @method_decorator(login_required_json, name='dispatch')
+# class StartTournamentGameSessionView(View):
+#     """
+#     Lance la GameSession (status=running) et appelle schedule_game pour la boucle.
+#     Correspond à POST /game/start_tournament_game_session/<game_id>.
+#     """
+#     def post(self, request, game_id):
+#         try:
+#             session = GameSession.objects.get(id=game_id)
+#         except GameSession.DoesNotExist:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': "La session de jeu spécifiée n'existe pas.",
+#             }, status=404)
+
+#         # On s'assure que c'est bien local (pas online)
+#         if session.is_online:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': "Cette session est en ligne, impossible de la lancer avec l'API locale.",
+#             }, status=400)
+
+#         if session.status == 'running':
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f"La partie {game_id} est déjà en cours.",
+#             }, status=400)
+
+#         if session.status == 'finished':
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': f"La partie {game_id} est déjà terminée.",
+#             }, status=400)
+
+#         # On lance la loop de jeu asynchrone
+#         schedule_game(str(session.id))
+
+#         # Mettre la session en état "running"
+#         session.status = 'running'
+#         # le bouton a ete appuye ce qui signifie que les 2 joueurs sont prets (en local)
+#         session.ready_left = True
+#         session.ready_right = True
+#         session.save()
+
+#         return JsonResponse({
+#             'status': 'success',
+#             'message': f"Partie {game_id} lancée avec succès."
+#         })
+
+
+
+# gameTournament.py
+import logging
+from django.views import View
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+from django.templatetags.static import static  
+from pong_project.decorators import login_required_json
+from game.forms import TournamentParametersForm
+from game.models import LocalTournament, GameSession, GameParameters
+from game.manager import schedule_game
+from django.utils.translation import gettext as _  # Import pour la traduction
+
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CreateTournamentView(View):
+    """
+    Affiche le formulaire de création de tournoi et crée un nouveau tournoi.
+    """
+    def get(self, request):
+        try:
+
+            form = TournamentParametersForm()
+            if request.POST.get('is_touch', 'false') == "true":
+                return JsonResponse({'status': 'error', 'message': _('Mode non disponible pour le tactile')}, status=403)
+            rendered_html = render_to_string('game/tournament/select_players.html', {'form': form}, request=request)
+            return JsonResponse({'status': 'success', 'html': rendered_html}, status=200)
+        except Exception as e:
+            # logger.exception("Error in CreateTournamentView GET: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+    
+    def post(self, request):
+        try:
+            form = TournamentParametersForm(request.POST)
+            if not form.is_valid():
+                # logger.debug("Formulaire de tournoi invalide: %s", form.errors)
+                return JsonResponse({'status': 'error', 'message': _('Formulaire invalide.'), 'errors': form.errors}, status=400)
+            tournament = form.save()
+            # logger.info(f"Tournament {tournament.id} créé avec succès.")
+            return JsonResponse({'status': 'success', 'tournament_id': str(tournament.id), 'message': _(f"Tournoi {tournament.name} créé avec succès.")}, status=201)
+        except Exception as e:
+            # logger.exception("Error in CreateTournamentView POST: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class TournamentBracketView(View):
+    """
+    Récupère l'état et le bracket du tournoi.
+    """
+    def get(self, request, tournament_id):
+        try:
+            tournament = get_object_or_404(LocalTournament, id=tournament_id)
+            status = tournament.status
+            player_avatars = {
+                tournament.player1: static('svg/astronaut_gang.svg'),
+                tournament.player2: static('svg/shark_dumbble.svg'),
+                tournament.player3: static('svg/monkey_money.svg'),
+                tournament.player4: static('svg/death_bath.svg'),
+            }
+            rendered_html = render_to_string('game/tournament/tournament_bracket.html', request=request)
+            return JsonResponse({
+                'status': 'success',
+                'html': rendered_html,
+                'tournament_status': status,
+                'tournament_name': tournament.name,
+                'player1': tournament.player1,
+                'player2': tournament.player2,
+                'player3': tournament.player3,
+                'player4': tournament.player4,
+                'winner_semifinal_1': tournament.winner_semifinal_1,
+                'winner_semifinal_2': tournament.winner_semifinal_2,
+                'winner_final': tournament.winner_final,
+                'player_avatars': player_avatars,
+            }, status=200)
+        except Exception as e:
+            # logger.exception("Error in TournamentBracketView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class TournamentNextGameView(View):
+    """
+    Renvoie le prochain match à jouer.
+    """
+    def get(self, request, tournament_id):
+        try:
+            tournament = get_object_or_404(LocalTournament, id=tournament_id)
+            tournament_status = tournament.status
+            if tournament_status == "finished":
+                return JsonResponse({'status': 'success', 'html': "<p>Le tournoi est terminé !</p>", 'next_match_type': 'finished'}, status=200)
+            match_mapping = {
+                'pending': 'semifinal1',
+                'semifinal1_done': 'semifinal2',
+                'semifinal2_done': 'final',
+            }
+            next_match_type = match_mapping.get(tournament_status, None)
+            if not next_match_type:
+                return JsonResponse({'status': 'error', 'message': _(f"Type de match invalide pour le statut : {tournament_status}")}, status=400)
+            if next_match_type == 'finished':
+                return JsonResponse({'status': 'success', 'html': "<p>Le tournoi est terminé !</p>", 'next_match_type': 'finished'}, status=200)
+            if next_match_type == 'semifinal1':
+                player_left = tournament.player1
+                player_right = tournament.player2
+            elif next_match_type == 'semifinal2':
+                player_left = tournament.player3
+                player_right = tournament.player4
+            elif next_match_type == 'final':
+                player_left = tournament.winner_semifinal_1 
+                player_right = tournament.winner_semifinal_2
+            else:
+                player_left, player_right = "???", "???"
+            next_game_context = {'next_match_type': next_match_type, 'player_left': player_left, 'player_right': player_right}
+            rendered_html = render_to_string('game/tournament/tournament_next_game.html', next_game_context, request=request)
+            return JsonResponse({'status': 'success', 'html': rendered_html, 'next_match_type': next_match_type}, status=200)
+        except Exception as e:
+            # logger.exception("Error in TournamentNextGameView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class CreateTournamentGameSessionView(View):
+    """
+    Crée une GameSession pour le tournoi.
+    """
+    def post(self, request, tournament_id):
+        try:
+            tournament = get_object_or_404(LocalTournament, id=tournament_id)
+            next_match_type = request.POST.get('next_match_type', '').strip()
+            if not tournament.parameters:
+                return JsonResponse({'status': 'error', 'message': _("Ce tournoi ne dispose pas de TournamentParameters.")}, status=400)
+            if next_match_type == 'semifinal1':
+                player_left_local = tournament.player1
+                player_right_local = tournament.player2
+                tournament.status = 'semifinal1_in_progress'
+            elif next_match_type == 'semifinal2':
+                player_left_local = tournament.player3
+                player_right_local = tournament.player4
+                tournament.status = 'semifinal2_in_progress'
+            elif next_match_type == 'final':
+                player_left_local = tournament.winner_semifinal_1
+                player_right_local = tournament.winner_semifinal_2
+                if not player_left_local or not player_right_local:
+                    return JsonResponse({'status': 'error', 'message': _("Impossible de créer la finale: gagnants non définis.")}, status=400)
+                tournament.status = 'final_in_progress'
+            else:
+                return JsonResponse({'status': 'error', 'message': _(f"Type de match invalide: {next_match_type}")}, status=400)
+            
+            game_session = GameSession.objects.create(
+                status='waiting',
+                is_online=False,
+                player_left_local=player_left_local,
+                player_right_local=player_right_local,
+                tournament_id=str(tournament.id)
+            )
+            tparams = tournament.parameters
+            GameParameters.objects.create(
+                game_session=game_session,
+                ball_speed=tparams.ball_speed,
+                paddle_size=tparams.paddle_size,
+                bonus_enabled=tparams.bonus_enabled,
+                obstacles_enabled=tparams.obstacles_enabled,
+            )
+            if next_match_type == 'semifinal1':
+                tournament.semifinal1 = game_session
+            elif next_match_type == 'semifinal2':
+                tournament.semifinal2 = game_session
+            else:
+                tournament.final = game_session
+            tournament.save()
+            # logger.info(f"GameSession {game_session.id} créée pour {next_match_type}.")
+            context = {'player_left_name': player_left_local, 'player_right_name': player_right_local}
+            rendered_html = render_to_string('game/live_game.html', context, request=request)
+            return JsonResponse({
+                'status': 'success',
+                'message': _(f"{next_match_type} créée pour le tournoi {tournament.name}."),
+                'game_id': str(game_session.id),
+                'html': rendered_html,
+                'tournament_status': tournament.status,
+            }, status=201)
+        except Exception as e:
+            # logger.exception("Error in CreateTournamentGameSessionView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)
+
+@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(login_required_json, name='dispatch')
+class StartTournamentGameSessionView(View):
+    """
+    Lance une session de jeu de tournoi.
+    """
+    def post(self, request, game_id):
+        try:
+            session = get_object_or_404(GameSession, id=game_id)
+            if session.is_online:
+                return JsonResponse({'status': 'error', 'message': _("Cette session est en ligne, impossible de la lancer avec l'API locale.")}, status=400)
+            if session.status in ['running', 'finished']:
+                return JsonResponse({'status': 'error', 'message': _(f"La partie {game_id} est déjà en cours ou terminée.")}, status=400)
+            schedule_game(str(session.id))
+            session.status = 'running'
+            session.ready_left = True
+            session.ready_right = True
+            session.save()
+            return JsonResponse({'status': 'success', 'message': _(f"Partie {game_id} lancée avec succès.")}, status=200)
+        except Exception as e:
+            # logger.exception("Error in StartTournamentGameSessionView: %s", e)
+            return JsonResponse({'status': 'error', 'message': _('Erreur interne du serveur')}, status=500)

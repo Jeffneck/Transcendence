@@ -15,18 +15,15 @@ async function handleFormSubmit(form, app, view, successMessage, successSelector
       if (successElem) {
         successElem.textContent = successMessage;
         successElem.style.display = 'block';
-        setTimeout(() => {
-          successElem.style.display = 'none';
-        }, 3000);
+        setTimeout(() => { successElem.style.display = 'none'; }, 3000);
       }
       form.reset();
-      if (successSelector === '#change-avatar-success') {
-        await handleNavbar();
-      }
-      // Pour changement de pseudo, par exemple, déconnecter l'utilisateur
-      else if (successSelector === '#change-username-success') {
-        handleLogout();
+      // Pour le changement de pseudo, on force la déconnexion
+      if (successSelector === '#change-username-success') {
+        await handleLogout();
         return;
+      } else if (successSelector === '#change-avatar-success') {
+        await handleNavbar();
       }
       navigateTo('/account');
     } else {
@@ -53,9 +50,7 @@ export function initializeaccountsManagementFormHandlers() {
           case 'change-avatar-form':
             await handleFormSubmit(form, 'accounts', 'profile/update_avatar', 'Avatar mis à jour!', '#change-avatar-success');
             break;
-          case 'delete-account-form':
-            // La gestion de la suppression se fait via un autre module
-            break;
+          // La suppression de compte est gérée via une modale et un module spécifique.
           default:
             console.warn('Formulaire non reconnu:', form.id);
         }

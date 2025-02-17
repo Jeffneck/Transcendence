@@ -13,6 +13,6 @@ export function handleOptionPopup(option) {
   } else if (option === 'Supprimer') {
     handleRemoveFriend(friendName);
   } else {
-    console.error(`Option inconnue : ${option}`);
+    console.error(`Option inconnue: ${option}`);
   }
 }

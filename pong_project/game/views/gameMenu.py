@@ -30,11 +30,11 @@ class GameMenuView(View):
         })
 
 
-    def http_method_not_allowed(self, request, *args, **kwargs):
-        # logger.warning(f"Méthode non autorisée : {request.method} pour GameMenuView")
-        return JsonResponse({
-            'status': 'error',
-            'message': _('Méthode non autorisée')
-        }, status=405)
+    # def http_method_not_allowed(self, request, *args, **kwargs):
+    #     # logger.warning(f"Méthode non autorisée : {request.method} pour GameMenuView")
+    #     return JsonResponse({
+    #         'status': 'error',
+    #         'message': _('Méthode non autorisée')
+    #     }, status=405)
 
 

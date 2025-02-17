@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.views.decorators.csrf import csrf_protect
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from pong_project.decorators import login_required_json
 from django.utils.translation import gettext as _  # Import pour la traduction
 
@@ -19,42 +20,28 @@ logger = logging.getLogger(__name__)
 
 
 class FriendValidationError(Exception):
-    """
-    Exception personnalisée pour les erreurs de validation d'ami.
-    """
+    """Exception personnalisée pour les erreurs de validation d'ami."""
     pass
-
 
 @method_decorator(csrf_protect, name='dispatch')
 @method_decorator(login_required_json, name='dispatch')
 class BaseFriendView(View):
     """
-    Classe de base pour les vues liées aux amis, fournissant des méthodes utilitaires.
+    Classe de base pour les opérations liées aux amis.
     """
     def validate_friend(self, user, friend_username):
-        """
-        Valide le nom d'utilisateur de l'ami et retourne l'instance utilisateur correspondante.
-        """
         if not friend_username:
             raise FriendValidationError(_("Nom d'utilisateur de l'ami manquant"))
-        
-        # Nettoyage de l'entrée (suppression des espaces superflus)
         friend_username = friend_username.strip()
-        
         try:
             friend = User.objects.get(username=friend_username)
         except User.DoesNotExist:
             raise FriendValidationError(_("Ami introuvable"))
-
         if friend == user:
             raise FriendValidationError(_("Vous ne pouvez pas vous envoyer une demande d'ami à vous-même."))
-
         return friend
 
     def create_json_response(self, status, message, status_code=200):
-        """
-        Méthode utilitaire pour créer des réponses JSON.
-        """
         return JsonResponse({'status': status, 'message': message}, status=status_code)
 
 
@@ -66,32 +53,26 @@ class AddFriendView(BaseFriendView):
     """
     def post(self, request):
         user = request.user
-        # Nettoyage de l'entrée utilisateur
         friend_username = (request.POST.get('friend_username') or "").strip()
         try:
             friend = self.validate_friend(user, friend_username)
+            if friend in user.friends.all():
+                return self.create_json_response('error', _('Vous êtes déjà ami avec cet utilisateur.'), status_code=400)
+            if FriendRequest.objects.filter(from_user=user, to_user=friend).exists():
+                return self.create_json_response('error', _("Demande d'ami déjà envoyée."), status_code=400)
+            if FriendRequest.objects.filter(from_user=friend, to_user=user).exists():
+                return self.create_json_response('error', _("Cet utilisateur vous a déjà envoyé une demande d'ami."), status_code=400)
+
+            FriendRequest.objects.create(from_user=user, to_user=friend)
+            logger.info("Demande d'ami envoyée de %s à %s.", user.username, friend.username)
+            return self.create_json_response('success', _("Demande d'ami envoyée."), status_code=200)
+
         except FriendValidationError as e:
-            # logger.error(f"Erreur lors de l'ajout d'un ami: {e}")
+            logger.error("Erreur lors de l'ajout d'un ami: %s", e)
             return self.create_json_response('error', str(e), status_code=400)
-
-        # Vérifie que l'utilisateur n'est pas déjà ami
-        if friend in user.friends.all():
-            # logger.error(f"Erreur : {user.username} est déjà ami avec {friend.username}")
-            return self.create_json_response('error', _('Vous êtes déjà ami avec cet utilisateur.'), status_code=400)
-
-        # Vérifie si une demande d'ami a déjà été envoyée ou reçue
-        if FriendRequest.objects.filter(from_user=user, to_user=friend).exists():
-            # logger.error(f"Erreur : Demande d'ami déjà envoyée de {user.username} à {friend.username}")
-            return self.create_json_response('error', _("Demande d'ami déjà envoyée."), status_code=400)
-
-        if FriendRequest.objects.filter(from_user=friend, to_user=user).exists():
-            # logger.error(f"Erreur : Demande d'ami déjà reçue de {friend.username} pour {user.username}")
-            return self.create_json_response('error', _("Cet utilisateur vous a déjà envoyé une demande d'ami."), status_code=400)
-
-        # Création de la demande d'ami
-        FriendRequest.objects.create(from_user=user, to_user=friend)
-        # logger.info(f"Demande d'ami envoyée de {user.username} à {friend.username}.")
-        return self.create_json_response('success', _("Demande d'ami envoyée."), status_code=200)
+        except Exception as e:
+            logger.exception("Erreur inattendue lors de l'ajout d'un ami pour %s: %s", user.username, str(e))
+            return self.create_json_response('error', _("Erreur lors de l'envoi de la demande d'ami."), status_code=500)
 
 
 @method_decorator(csrf_protect, name='dispatch')
@@ -106,34 +87,25 @@ class HandleFriendRequestView(View):
         try:
             request_id = request.POST.get('request_id')
             action = request.POST.get('action')
-            
-            # logger.debug(f"Traitement de la demande d'ami ID: {request_id} pour {user.username}")
-
-            # Récupère la demande d'ami
             friend_request = get_object_or_404(FriendRequest, id=request_id, to_user=user)
 
             if action == 'accept':
-                # Ajoute les deux utilisateurs comme amis
                 user.friends.add(friend_request.from_user)
                 friend_request.from_user.friends.add(user)
-
-                # Supprime la demande d'ami
                 friend_request.delete()
-                # logger.info(f"Demande d'ami acceptée entre {user.username} et {friend_request.from_user.username}.")
+                logger.info("Demande d'ami acceptée entre %s et %s.", user.username, friend_request.from_user.username)
                 return JsonResponse({'status': 'success', 'message': _("Demande d'ami acceptée")}, status=200)
 
             elif action == 'decline':
-                # Supprime la demande d'ami
                 friend_request.delete()
-                # logger.info(f"Demande d'ami refusée entre {user.username} et {friend_request.from_user.username}.")
+                logger.info("Demande d'ami refusée entre %s et %s.", user.username, friend_request.from_user.username)
                 return JsonResponse({'status': 'success', 'message': _("Demande d'ami refusée")}, status=200)
-
             else:
-                # logger.warning("Action non valide lors du traitement de la demande d'ami")
+                logger.warning("Action non valide lors du traitement de la demande d'ami pour %s.", user.username)
                 return JsonResponse({'status': 'error', 'message': _("Action non valide")}, status=400)
 
         except Exception as e:
-            # logger.error(f"Erreur lors du traitement de la demande d'ami: {e}")
+            logger.exception("Erreur lors du traitement de la demande d'ami pour %s: %s", user.username, str(e))
             return JsonResponse({'status': 'error', 'message': _("Erreur lors de la gestion de la demande d'ami")}, status=500)
 
 
@@ -148,17 +120,18 @@ class RemoveFriendView(BaseFriendView):
         friend_username = (request.POST.get('friend_username') or "").strip()
         try:
             friend = self.validate_friend(user, friend_username)
+            if friend not in user.friends.all():
+                return self.create_json_response('error', _("Cet utilisateur n'est pas dans votre liste d'amis."), status_code=400)
+
+            # Suppression réciproque de l'amitié
+            user.friends.remove(friend)
+            friend.friends.remove(user)
+            logger.info("Amitié supprimée entre %s et %s.", user.username, friend.username)
+            return self.create_json_response('success', _("Ami supprimé avec succès."), status_code=200)
+
         except FriendValidationError as e:
-            # logger.error(f"Erreur lors de la suppression d'un ami: {e}")
+            logger.error("Erreur lors de la suppression d'un ami: %s", e)
             return self.create_json_response('error', str(e), status_code=400)
-
-        if friend not in user.friends.all():
-            # logger.error(f"Erreur : {friend.username} n'est pas dans la liste d'amis de {user.username}")
-            return self.create_json_response('error', _("Cet utilisateur n'est pas dans votre liste d'amis."), status_code=400)
-
-        # Suppression réciproque de l'ami
-        user.friends.remove(friend)
-        friend.friends.remove(user)
-
-        # logger.info(f"Suppression de l'amitié entre {user.username} et {friend.username}.")
-        return self.create_json_response('success', _("Ami supprimé avec succès."), status_code=200)
+        except Exception as e:
+            logger.exception("Erreur inattendue lors de la suppression d'un ami pour %s: %s", user.username, str(e))
+            return self.create_json_response('error', _("Erreur lors de la suppression de l'ami."), status_code=500)

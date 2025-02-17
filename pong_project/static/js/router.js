@@ -4,6 +4,7 @@ import { handleLogin, initializeRegisterView, initializeLogin2FAView, handleDisa
 import {  initializeGameHomeView, handleGameMenu, createGameOnline, handleTournament } from './game/index.js';
 import { handleAccountsManagement } from './accountManagement/index.js';
 import { handleViewProfile } from './userProfile/index.js';
+import { handleFriendProfile } from './friends/index.js';
 import { handleNavbar } from './navbar/loadNavbar.js';
 import { initializeNotFoundView } from './tools/errorPage.js';
 

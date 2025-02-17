@@ -1,9 +1,10 @@
 "use strict";
 import { requestPost } from '../../api/index.js';
+import { refreshBurgerMenu } from '../../navbar/loadNavbar.js';
 import { showStatusMessage } from '../../tools/index.js';
 
-async function friendInvitation(requestId, action) {
-  console.debug(`Demande d'ami ID ${requestId}, action : ${action}`);
+async function processFriendInvitation(requestId, action) {
+  console.debug(`Demande d'ami ID ${requestId}, action: ${action}`);
   const formData = new FormData();
   formData.append('request_id', requestId);
   formData.append('action', action);
@@ -15,15 +16,16 @@ async function friendInvitation(requestId, action) {
     }
     return response;
   } catch (error) {
-    console.error('Erreur dans friendInvitation:', error);
+    console.error('Erreur dans processFriendInvitation:', error);
     throw error;
   }
 }
 
 export async function handleFriendInvitation(requestId, action) {
   try {
-    const response = await friendInvitation(requestId, action);
+    const response = await processFriendInvitation(requestId, action);
     showStatusMessage(response.message || 'Demande d\'ami traitée avec succès.', 'success');
+    refreshBurgerMenu();
   } catch (error) {
     showStatusMessage(error?.message || 'Erreur lors du traitement de la demande d\'ami.', 'error');
   }
