@@ -102,65 +102,158 @@ async function checkGameInvitationStatus(response) {
 
     // 2) On récupère l'ID de l'invitation depuis la réponse 
     //    (assure-toi que ton backend t'envoie bien `invitation_id` dans `response`)
-    const invitationId = response.invitation_id;  
+    const invitationId = response.invitation_id;
 
     // 3) On définit l'interval pour faire un GET sur CheckGameInvitationStatusView
     const intervalDelay = 3000; // en ms, par ex. toutes les 3 secondes
-    let pollInterval = setInterval(async () => {
+    let pollInterval;
+
+    // Variable pour savoir si l'utilisateur est toujours sur la page de chargement
+    let isPageActive = true;
+
+    // Fonction pour stopper le polling si la page devient inactive
+    function stopPolling() {
+        clearInterval(pollInterval);
+        console.log("Polling arrêté car la page n'est plus active.");
+    }
+
+    // Écouter l'événement de visibilité de la page
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            isPageActive = false;
+            stopPolling();
+        } else {
+            isPageActive = true;
+        }
+    });
+
+    // Écouter l'événement avant la fermeture ou le rechargement de la page
+    window.addEventListener('beforeunload', () => {
+        isPageActive = false;
+        stopPolling();
+    });
+
+    pollInterval = setInterval(async () => {
+        // Si la page est inactive, on arrête le polling
+        if (!isPageActive) {
+            clearInterval(pollInterval);
+            console.log("Polling arrêté, utilisateur a quitté la page.");
+            return;
+        }
+
         try {
             const data = await requestGet('game', `check_invitation_status/${invitationId}`);
             // Gérer la réponse
             if (data.status === 'success') {
-                
-              // Vérifier data.status (succès) et data.invitation_status (pending, accepted, etc.)
-                if (data.status === 'success') {
-                    // data.invitation_status => 'pending', 'accepted', 'rejected', 'expired'
-                    switch (data.invitation_status) {
-                        case 'pending':
-                            // On ne fait rien, on attend le prochain interval
-                            //console.log("Invitation toujours en attente...");
-                            break;
+                switch (data.invitation_status) {
+                    case 'pending':
+                        // On ne fait rien, on attend le prochain interval
+                        break;
 
-                        case 'accepted':
-                            //console.log("Invitation acceptée !");
-                            // 1) Arrêter le polling
-                            clearInterval(pollInterval);
+                    case 'accepted':
+                        clearInterval(pollInterval);
+                        joinOnlineGameAsLeft(data.session_id);
+                        break;
 
-                            // 2) Rediriger vers la page de jeu
-                            joinOnlineGameAsLeft(data.session_id);
-                            break;
+                    case 'rejected':
+                        clearInterval(pollInterval);
+                        showStatusMessage('Invitation refusée.', 'error');
+                        createGameOnline();
+                        break;
 
-                        case 'rejected':
-                            clearInterval(pollInterval);
-                            showStatusMessage('Invitation refusée.', 'error');
-                            createGameOnline();
-                            break;
-                        case 'expired':
-                            clearInterval(pollInterval);
-                            showStatusMessage('Invitation expirée.', 'error');
-                            createGameOnline();
-                            break;
-                        default:
-                            console.warn("Statut inconnu :", data.invitation_status);
-                            break;
-                    }
-                } else {
-                    // Gérer data.status = 'error'
-                    console.error("Erreur lors de la vérification :", data.message);
-                    clearInterval(pollInterval);
+                    case 'expired':
+                        clearInterval(pollInterval);
+                        showStatusMessage('Invitation expirée.', 'error');
+                        createGameOnline();
+                        break;
+
+                    default:
+                        console.warn("Statut inconnu :", data.invitation_status);
+                        break;
                 }
             } else {
-                // Statut HTTP non 200 => on arrête tout
-                console.error("Échec de la requête GET sur check_invitation_status :", statusResponse.status);
+                console.error("Erreur lors de la vérification :", data.message);
                 clearInterval(pollInterval);
             }
         } catch (err) {
             console.error("Erreur réseau/JS pendant le polling:", err);
             clearInterval(pollInterval);
         }
-    }, intervalDelay); 
+    }, intervalDelay);
 }
 
+
+// async function checkGameInvitationStatus(response) {
+//     // 1) On met à jour le contenu HTML et on initialise les contrôles (comme tu le fais déjà)
+//     updateHtmlContent('#content', response.html);
+
+//     if (isTouchDevice()) {
+//         initializeGameControls('touch');
+//     } else {
+//         initializeGameControls('keyboard');
+//     }
+
+//     // 2) On récupère l'ID de l'invitation depuis la réponse 
+//     //    (assure-toi que ton backend t'envoie bien `invitation_id` dans `response`)
+//     const invitationId = response.invitation_id;  
+
+//     // 3) On définit l'interval pour faire un GET sur CheckGameInvitationStatusView
+//     const intervalDelay = 3000; // en ms, par ex. toutes les 3 secondes
+//     let pollInterval = setInterval(async () => {
+//         try {
+//             const data = await requestGet('game', `check_invitation_status/${invitationId}`);
+//             // Gérer la réponse
+//             if (data.status === 'success') {
+                
+//               // Vérifier data.status (succès) et data.invitation_status (pending, accepted, etc.)
+//                 if (data.status === 'success') {
+//                     // data.invitation_status => 'pending', 'accepted', 'rejected', 'expired'
+//                     //IMPROVE detecter si l'utilisateur est sorti de la loading page pour sortir de cette fonction le cas échéant
+//                     switch (data.invitation_status) {
+//                         case 'pending':
+//                             // On ne fait rien, on attend le prochain interval
+//                             //console.log("Invitation toujours en attente...");
+//                             break;
+
+//                         case 'accepted':
+//                             //console.log("Invitation acceptée !");
+//                             // 1) Arrêter le polling
+//                             clearInterval(pollInterval);
+
+//                             // 2) Rediriger vers la page de jeu
+//                             joinOnlineGameAsLeft(data.session_id);
+//                             break;
+
+//                         case 'rejected':
+//                             clearInterval(pollInterval);
+//                             showStatusMessage('Invitation refusée.', 'error');
+//                             createGameOnline();
+//                             break;
+//                         case 'expired':
+//                             clearInterval(pollInterval);
+//                             showStatusMessage('Invitation expirée.', 'error');
+//                             createGameOnline();
+//                             break;
+//                         default:
+//                             console.warn("Statut inconnu :", data.invitation_status);
+//                             break;
+//                     }
+//                 } else {
+//                     // Gérer data.status = 'error'
+//                     console.error("Erreur lors de la vérification :", data.message);
+//                     clearInterval(pollInterval);
+//                 }
+//             } else {
+//                 // Statut HTTP non 200 => on arrête tout
+//                 console.error("Échec de la requête GET sur check_invitation_status :", statusResponse.status);
+//                 clearInterval(pollInterval);
+//             }
+//         } catch (err) {
+//             console.error("Erreur réseau/JS pendant le polling:", err);
+//             clearInterval(pollInterval);
+//         }
+//     }, intervalDelay); 
+// }
 
 function initializeFriendInvitationBtn(game_id) {
     document.addEventListener('click', async (event) => {

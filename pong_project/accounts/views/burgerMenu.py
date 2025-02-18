@@ -23,28 +23,39 @@ User = get_user_model()
 
 def clean_game_invitations(user):
     """
-    Supprime les invitations expirées et en doublon.
+    Supprime les invitations expirées et en doublon, avec des logs détaillant chaque action.
     """
     try:
         current_time = now()
         
         # Marquer les invitations expirées comme 'expired'
-        expired_count = GameInvitation.objects.filter(to_user=user, status='pending', expires_at__lt=current_time).update(status='expired')
+        expired_invitations = GameInvitation.objects.filter(to_user=user, status='pending', expires_at__lt=current_time)
+        expired_count = expired_invitations.update(status='expired')
+        
+        # Log des invitations expirées à cause du temps
+        for invitation in expired_invitations:
+            logger.info(f"Invitation expirée en raison du temps : {invitation.id}, envoyée par {invitation.from_user.username} à {invitation.to_user.username}.")
         
         # Supprimer les invitations en doublon (garder la plus récente par from_user)
         pending_invitations = GameInvitation.objects.filter(to_user=user, status='pending')
         latest_ids = []
         from_user_ids = pending_invitations.values_list('from_user', flat=True).distinct()
         
+        # Trouver les invitations les plus récentes pour chaque from_user
         for user_id in from_user_ids:
             latest_inv = pending_invitations.filter(from_user=user_id).order_by('-created_at').first()
             if latest_inv:
                 latest_ids.append(latest_inv.id)
         
-        # Marquer les invitations en doublon comme 'expired'
-        updated_count = pending_invitations.exclude(id__in=latest_ids).update(status='expired')
+        # Mettre à jour les invitations en doublon comme 'expired'
+        duplicate_invitations = pending_invitations.exclude(id__in=latest_ids)
+        duplicate_count = duplicate_invitations.update(status='expired')
         
-        return expired_count + updated_count
+        # Log des invitations marquées comme doublons
+        for invitation in duplicate_invitations:
+            logger.info(f"Invitation marquée comme doublon : {invitation.id}, envoyée par {invitation.from_user.username} à {invitation.to_user.username}.")
+        
+        return expired_count + duplicate_count
     except Exception as e:
         logger.error(f"Erreur lors du nettoyage des invitations pour l'utilisateur {user.username}: {e}")
         return 0

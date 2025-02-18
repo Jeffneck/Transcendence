@@ -8,7 +8,7 @@ from .views.gameLoading import LoadingView
 from .views.gameLocal import StartLocalGameView, CreateGameLocalView
 from .views.gameResults import GameResultsView 
 from .views.gameStatus import GetGameStatusView 
-from .views.gameOnline import CreateGameOnlineView, SendGameSessionInvitationView, AcceptGameInvitationView, RejectGameInvitationView, CleanExpiredInvitationsView, CheckGameInvitationStatusView, StartOnlineGameView, JoinOnlineGameAsLeftView, JoinOnlineGameAsRightView, CleanDuplicateInvitationsView
+from .views.gameOnline import CreateGameOnlineView, SendGameSessionInvitationView, AcceptGameInvitationView, RejectGameInvitationView, CheckGameInvitationStatusView, StartOnlineGameView, JoinOnlineGameAsLeftView, JoinOnlineGameAsRightView
 from .views.gameTournament import CreateTournamentView, CreateTournamentGameSessionView, StartTournamentGameSessionView, TournamentBracketView, TournamentNextGameView
 import logging
 

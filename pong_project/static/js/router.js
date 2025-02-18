@@ -42,6 +42,7 @@ export function navigateTo(route) {
     console.log(`Navigation vers ${route}`);
     console.log(` websocket state ${window.currentGameSocket}`);
 
+    //IMPROVE (peut etre qu'il faut gerer cela ailleurs que dans le router) systeme qui arrete l'attente de l'acceptation d'une game invitation quand on change de route
     //fermer le socket si une session de jeu est en cours 
     if (window.currentGameSocket && window.currentGameSocket.readyState === WebSocket.OPEN) {
         console.log('Fermeture de la WebSocket en cours...');
