@@ -158,13 +158,11 @@ async function checkGameInvitationStatus(response) {
                     case 'rejected':
                         clearInterval(pollInterval);
                         showStatusMessage('Invitation refusée.', 'error');
-                        createGameOnline();
                         break;
 
                     case 'expired':
                         clearInterval(pollInterval);
                         showStatusMessage('Invitation expirée.', 'error');
-                        createGameOnline();
                         break;
 
                     default:
