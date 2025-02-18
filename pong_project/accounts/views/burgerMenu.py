@@ -21,10 +21,41 @@ from game.models import GameInvitation
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+def clean_game_invitations(user):
+    """
+    Supprime les invitations expirées et en doublon.
+    """
+    try:
+        current_time = now()
+        
+        # Marquer les invitations expirées comme 'expired'
+        expired_count = GameInvitation.objects.filter(to_user=user, status='pending', expires_at__lt=current_time).update(status='expired')
+        
+        # Supprimer les invitations en doublon (garder la plus récente par from_user)
+        pending_invitations = GameInvitation.objects.filter(to_user=user, status='pending')
+        latest_ids = []
+        from_user_ids = pending_invitations.values_list('from_user', flat=True).distinct()
+        
+        for user_id in from_user_ids:
+            latest_inv = pending_invitations.filter(from_user=user_id).order_by('-created_at').first()
+            if latest_inv:
+                latest_ids.append(latest_inv.id)
+        
+        # Marquer les invitations en doublon comme 'expired'
+        updated_count = pending_invitations.exclude(id__in=latest_ids).update(status='expired')
+        
+        return expired_count + updated_count
+    except Exception as e:
+        logger.error(f"Erreur lors du nettoyage des invitations pour l'utilisateur {user.username}: {e}")
+        return 0
+
 def get_burger_menu_context(user):
     """
     Retourne le contexte nécessaire pour le template du burger menu.
+    Avant d'ajouter les invitations au contexte, on nettoie les invitations expirées et en doublon.
     """
+    clean_game_invitations(user)  # Nettoyage des invitations avant de les inclure dans le contexte
+    
     default_avatar = '/media/avatars/default_avatar.png'
     return {
         'user': user,

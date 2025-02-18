@@ -57,6 +57,7 @@ export async function refreshBurgerMenu() {
     let menu = document.getElementById('burger-menu');
     let overlay = document.getElementById('overlay');
     if (!menu || !overlay) return;
+    
     const data = await requestGet('accounts', 'burgerMenu');
     if (data.status === 'success') {
       if (menu.style.display === 'block') {

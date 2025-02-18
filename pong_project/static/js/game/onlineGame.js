@@ -208,8 +208,6 @@ async function joinOnlineGameAsLeft(game_id){
                 return
             }
             await showResults(game_id);
-            
-            //IMPROVE afficher une page présentant le winner et looser une fois la game terminee
         } else {
             showStatusMessage(response.message, 'error');
         }
