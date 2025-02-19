@@ -57,7 +57,8 @@ export async function createGameOnline() {
 
 
 async function sendInvitation(button, game_id) {
-    //console.log('[sendInvitation] Envoi de l\'invitation...');
+    console.log('[sendInvitation] Envoi de l\'invitation...');
+    console.log('game_id :', game_id);
     const friendUsername = button.closest('li')?.getAttribute('data-username');
     if (!friendUsername) {
         console.error('Nom d\'utilisateur introuvable.');
@@ -86,88 +87,60 @@ async function sendInvitation(button, game_id) {
     }
 }
 
-// Lancée pour le joueur left après qu'il ait fait sendInvitation()
-// Check le statut de l'invitation envoyée toutes les 3 secondes 
-// Pendant que le joueur est sur la page loading.html
-// redirige vers joinOnlineGameAsLeft() quand l'autre joueur a accepté l'invitation
-async function checkGameInvitationStatus(response) {
-    // 1) On met à jour le contenu HTML et on initialise les contrôles (comme tu le fais déjà)
-    updateHtmlContent('#content', response.html);
 
+async function checkGameInvitationStatus(response) {
+    // 1) Met à jour le contenu HTML et initialise les contrôles
+    updateHtmlContent('#content', response.html);
     if (isTouchDevice()) {
         initializeGameControls('touch');
     } else {
         initializeGameControls('keyboard');
     }
 
-    // 2) On récupère l'ID de l'invitation depuis la réponse 
-    //    (assure-toi que ton backend t'envoie bien `invitation_id` dans `response`)
-    const invitationId = response.invitation_id;
+    // 2) Récupère l'ID de l'invitation depuis la réponse
+    const invitationId = response.invitation_id;  
 
-    // 3) On définit l'interval pour faire un GET sur CheckGameInvitationStatusView
-    const intervalDelay = 3000; // en ms, par ex. toutes les 3 secondes
-    let pollInterval;
+    // 3) Définition du délai d'intervalle et initialisation du flag de traitement
+    const intervalDelay = 3000; // toutes les 3 secondes
+    let handled = false; // S'assure que le traitement terminal (accepted, rejected, expired) s'exécute une seule fois
 
-    // Variable pour savoir si l'utilisateur est toujours sur la page de chargement
-    let isPageActive = true;
-
-    // Fonction pour stopper le polling si la page devient inactive
-    function stopPolling() {
-        clearInterval(pollInterval);
-        console.log("Polling arrêté car la page n'est plus active.");
-    }
-
-    // Écouter l'événement de visibilité de la page
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            isPageActive = false;
-            stopPolling();
-        } else {
-            isPageActive = true;
-        }
-    });
-
-    // Écouter l'événement avant la fermeture ou le rechargement de la page
-    window.addEventListener('beforeunload', () => {
-        isPageActive = false;
-        stopPolling();
-    });
-
-    pollInterval = setInterval(async () => {
-        // Si la page est inactive, on arrête le polling
-        if (!isPageActive) {
-            clearInterval(pollInterval);
-            console.log("Polling arrêté, utilisateur a quitté la page.");
-            return;
-        }
-
+    let pollInterval = setInterval(async () => {
         try {
             const data = await requestGet('game', `check_invitation_status/${invitationId}`);
-            // Gérer la réponse
+
             if (data.status === 'success') {
-                switch (data.invitation_status) {
-                    case 'pending':
-                        // On ne fait rien, on attend le prochain interval
-                        break;
+                // On traite uniquement si la réponse n'a pas encore été gérée
+                if (!handled) {
+                    switch (data.invitation_status) {
+                        case 'pending':
+                            // Invitation toujours en attente, on attend la prochaine itération
+                            break;
 
-                    case 'accepted':
-                        clearInterval(pollInterval);
-                        joinOnlineGameAsLeft(data.session_id);
-                        break;
+                        case 'accepted':
+                            handled = true;
+                            clearInterval(pollInterval);
+                            // Redirige vers la session de jeu pour le joueur de gauche
+                            joinOnlineGameAsLeft(data.session_id);
+                            break;
 
-                    case 'rejected':
-                        clearInterval(pollInterval);
-                        showStatusMessage('Invitation refusée.', 'error');
-                        break;
+                        case 'rejected':
+                            handled = true;
+                            clearInterval(pollInterval);
+                            showStatusMessage('Invitation refusée.', 'error');
+                            createGameOnline();
+                            break;
 
-                    case 'expired':
-                        clearInterval(pollInterval);
-                        showStatusMessage('Invitation expirée.', 'error');
-                        break;
+                        case 'expired':
+                            handled = true;
+                            clearInterval(pollInterval);
+                            showStatusMessage('Invitation expirée.', 'error');
+                            createGameOnline();
+                            break;
 
-                    default:
-                        console.warn("Statut inconnu :", data.invitation_status);
-                        break;
+                        default:
+                            console.warn("Statut inconnu :", data.invitation_status);
+                            break;
+                    }
                 }
             } else {
                 console.error("Erreur lors de la vérification :", data.message);
@@ -181,100 +154,41 @@ async function checkGameInvitationStatus(response) {
 }
 
 
-// async function checkGameInvitationStatus(response) {
-//     // 1) On met à jour le contenu HTML et on initialise les contrôles (comme tu le fais déjà)
-//     updateHtmlContent('#content', response.html);
-
-//     if (isTouchDevice()) {
-//         initializeGameControls('touch');
-//     } else {
-//         initializeGameControls('keyboard');
-//     }
-
-//     // 2) On récupère l'ID de l'invitation depuis la réponse 
-//     //    (assure-toi que ton backend t'envoie bien `invitation_id` dans `response`)
-//     const invitationId = response.invitation_id;  
-
-//     // 3) On définit l'interval pour faire un GET sur CheckGameInvitationStatusView
-//     const intervalDelay = 3000; // en ms, par ex. toutes les 3 secondes
-//     let pollInterval = setInterval(async () => {
-//         try {
-//             const data = await requestGet('game', `check_invitation_status/${invitationId}`);
-//             // Gérer la réponse
-//             if (data.status === 'success') {
-                
-//               // Vérifier data.status (succès) et data.invitation_status (pending, accepted, etc.)
-//                 if (data.status === 'success') {
-//                     // data.invitation_status => 'pending', 'accepted', 'rejected', 'expired'
-//                     //IMPROVE detecter si l'utilisateur est sorti de la loading page pour sortir de cette fonction le cas échéant
-//                     switch (data.invitation_status) {
-//                         case 'pending':
-//                             // On ne fait rien, on attend le prochain interval
-//                             //console.log("Invitation toujours en attente...");
-//                             break;
-
-//                         case 'accepted':
-//                             //console.log("Invitation acceptée !");
-//                             // 1) Arrêter le polling
-//                             clearInterval(pollInterval);
-
-//                             // 2) Rediriger vers la page de jeu
-//                             joinOnlineGameAsLeft(data.session_id);
-//                             break;
-
-//                         case 'rejected':
-//                             clearInterval(pollInterval);
-//                             showStatusMessage('Invitation refusée.', 'error');
-//                             createGameOnline();
-//                             break;
-//                         case 'expired':
-//                             clearInterval(pollInterval);
-//                             showStatusMessage('Invitation expirée.', 'error');
-//                             createGameOnline();
-//                             break;
-//                         default:
-//                             console.warn("Statut inconnu :", data.invitation_status);
-//                             break;
-//                     }
-//                 } else {
-//                     // Gérer data.status = 'error'
-//                     console.error("Erreur lors de la vérification :", data.message);
-//                     clearInterval(pollInterval);
-//                 }
-//             } else {
-//                 // Statut HTTP non 200 => on arrête tout
-//                 console.error("Échec de la requête GET sur check_invitation_status :", statusResponse.status);
-//                 clearInterval(pollInterval);
-//             }
-//         } catch (err) {
-//             console.error("Erreur réseau/JS pendant le polling:", err);
-//             clearInterval(pollInterval);
-//         }
-//     }, intervalDelay); 
-// }
+// Variable globale pour stocker la référence au gestionnaire d'événement actuel
+let currentFriendInvitationHandler = null;
 
 function initializeFriendInvitationBtn(game_id) {
-    document.addEventListener('click', async (event) => {
+    // Si un gestionnaire est déjà attaché, le retirer
+    if (currentFriendInvitationHandler !== null) {
+        document.removeEventListener('click', currentFriendInvitationHandler);
+    }
+
+    // Définir le nouveau gestionnaire avec le game_id actuel
+    const handler = async (event) => {
         const btn = event.target.closest('.invite-button');
         if (!btn) return;
 
+        // Si l'utilisateur clique sur l'icône d'annulation, gérer l'annulation
         if (event.target.classList.contains('cancel-icon')) {
             event.stopPropagation();
             await cancelInvitation(btn);
             return;
         }
 
-        // Si pas déjà envoyé
+        // Si l'invitation n'a pas encore été envoyée
         if (!btn.classList.contains('sent')) {
             await sendInvitation(btn, game_id);
         }
-    });
+    };
+
+    // Attacher le nouveau gestionnaire et enregistrer sa référence
+    document.addEventListener('click', handler);
+    currentFriendInvitationHandler = handler;
 }
 
 async function joinOnlineGameAsLeft(game_id){
     try {
         const tactile = isTouchDevice();
-        //console.log('tactile :', tactile);
         
         // Créez un FormData et ajoutez le paramètre is_touch
         const formData = new FormData();
@@ -288,15 +202,19 @@ async function joinOnlineGameAsLeft(game_id){
 
             updateHtmlContent('#content', response.html);
             
-            await launchLiveGameWithOptions(game_id, 'left', `start_online_game/${game_id}`);
+            await launchLiveGameWithOptions(game_id, 'left', `start_online_game/${game_id}`); // Boucle de jeu
+            
+            // Ajout d'une pause de 1 seconde
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             const statusResponse = await requestGet('game', `get_game_status/${game_id}`);
             if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
                 showStatusMessage('Un des joueurs s\'est deconnecte, partie annulee ...', 'error');
-                return
+                return;
             }
             if (statusResponse.status === 'error' ) {
                 showStatusMessage('Vous avez ete deconnecte de la partie en ligne', 'error');
-                return
+                return;
             }
             await showResults(game_id);
         } else {
@@ -363,6 +281,8 @@ async function joinOnlineGameAsRight(gameId) {
         // Si succès, afficher la page de jeu 
         updateHtmlContent('#content', response.html);
         await launchLiveGameWithOptions(gameId, 'right', `start_online_game/${gameId}`);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // on vérifie le status côté serveur avant de continuer la loop
         const statusResponse = await requestGet('game', `get_game_status/${gameId}`);
         if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
