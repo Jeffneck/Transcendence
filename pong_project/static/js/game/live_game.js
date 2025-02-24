@@ -1,23 +1,11 @@
-/* live_game.js
- *
- * Centralise les fonctions communes pour :
- * dessiner le canvas, les bumpers et les powerups
- * lancer le jeu en co-routine avec le bouton startGame 
- * recevoir les notifications (envoyées par broadcast.py > consumers.py > websocket)
- *    detecter la position de tous les elements de jeu (gameState)
- *    afficher des animations aux lieux d'impacts de la balle /lieux d'apparition des bumpers et powerups 
- * 
- */
-
 import { requestPost } from '../api/index.js';
 import { createPowerupSVG, createBumperSVG } from './live_game_svg.js';
 import { isTouchDevice } from "../tools/index.js";
-import { navigateTo } from '../router.js';
 
 let animationId;
 
 
-// Fonction exportée pour lancer la partie avec options
+
 export async function launchLiveGameWithOptions(gameId, userRole, urlStartButton) {
   const protocol = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
   const wsUrl = `${protocol}//${window.location.host}/ws/pong/${gameId}/`;
@@ -28,7 +16,7 @@ export async function launchLiveGameWithOptions(gameId, userRole, urlStartButton
   if (urlStartButton) {
     startGameSelector = document.querySelector("#startGameBtn");
     if (!startGameSelector) {
-      console.error("L'élément avec le sélecteur '#startGameBtn' n'a pas été trouvé.");
+      return;
     }
     
     onStartGame = async (gameId) => {
@@ -55,16 +43,16 @@ export async function launchLiveGameWithOptions(gameId, userRole, urlStartButton
   });
 }
 
-// ========== Fonctions Utilitaires Globales ==========
 
-// Initialise les images des powerups
+
+
 function initPowerupImages(powerupImages) {
   Object.keys(powerupImages).forEach(type => {
     powerupImages[type].src = createPowerupSVG(type);
   });
 }
 
-// Applique un effet flash sur le gameState
+
 function applyFlashEffect(gameState, duration = 300) {
   gameState.flash_effect = true;
   setTimeout(() => {
@@ -72,7 +60,7 @@ function applyFlashEffect(gameState, duration = 300) {
   }, duration);
 }
 
-// Crée un effet visuel de spawn/expiration et le supprime après la durée définie
+
 function createSpawnEffect(type, x, y, effectType, color, collisionEffects, SPAWN_EFFECT_DURATION, EXPIRE_EFFECT_DURATION) {
   const effect = {
     type,
@@ -92,7 +80,7 @@ function createSpawnEffect(type, x, y, effectType, color, collisionEffects, SPAW
   }, type.includes('spawn') ? SPAWN_EFFECT_DURATION : EXPIRE_EFFECT_DURATION);
 }
 
-// Crée un effet de collision et le supprime après EFFECT_DURATION
+
 function createCollisionEffect(type, x, y, color, collisionEffects, EFFECT_DURATION) {
   const effect = {
     type,
@@ -111,7 +99,7 @@ function createCollisionEffect(type, x, y, color, collisionEffects, EFFECT_DURAT
   }, EFFECT_DURATION);
 }
 
-// Affiche les effets de collision en animation
+
 function drawCollisionEffects(ctx, collisionEffects, SPAWN_EFFECT_DURATION, EXPIRE_EFFECT_DURATION) {
   collisionEffects.forEach(effect => {
     const now = Date.now();
@@ -244,7 +232,7 @@ function drawCollisionEffects(ctx, collisionEffects, SPAWN_EFFECT_DURATION, EXPI
   });
 }
 
-// Affiche le compte à rebours sur le canvas
+
 function drawCountdown(ctx, canvas, gameState) {
   if (typeof gameState.countdown !== 'undefined') {
     ctx.save();
@@ -261,7 +249,7 @@ function drawCountdown(ctx, canvas, gameState) {
   }
 }
 
-// Affiche le message de score (en cas de "scored")
+
 function drawScored(ctx, canvas, gameState) {
   if (typeof gameState.scoreMsg !== 'undefined') {
     ctx.save();
@@ -278,7 +266,7 @@ function drawScored(ctx, canvas, gameState) {
   }
 }
 
-// Met à jour l'affichage du score
+
 function updateScoreDisplay(gameState, canvas) {
   const scoreEl = document.getElementById("score-nb");
   if (scoreEl) {
@@ -286,7 +274,7 @@ function updateScoreDisplay(gameState, canvas) {
   }
 }
 
-// Gère le redimensionnement du canvas et des éléments associés
+
 function handleResize(canvas, ctx) {
   const ORIGINAL_WIDTH = 800;
   const ORIGINAL_HEIGHT = 400;
@@ -450,7 +438,7 @@ function handleResize(canvas, ctx) {
   }
 }
 
-// Active et gère les contrôles tactiles pour le jeu
+
 function initializeTouchControls(userRole, socket) {
   if (!isTouchDevice()) return;
   let lastTouchEnd = 0;
@@ -464,7 +452,6 @@ function initializeTouchControls(userRole, socket) {
   const btnUp = document.getElementById("touch1");
   const btnDown = document.getElementById("touch2");
   if (!btnUp || !btnDown) {
-    console.error("Les boutons tactiles ne sont pas définis dans le DOM.");
     return;
   }
   btnUp.addEventListener('touchstart', (e) => {
@@ -527,7 +514,7 @@ function initializeTouchControls(userRole, socket) {
   });
 }
 
-// Gère les événements clavier pour les appareils non tactiles
+
 function setupKeyboardControls(userRole, socket) {
   const keysPressed = {};
   document.addEventListener('keydown', (evt) => {
@@ -613,7 +600,7 @@ function setupKeyboardControls(userRole, socket) {
   });
 }
 
-// Gère les événements de glissement (swipe) sur les appareils tactiles
+
 function setupTouchSwipe() {
   const SWIPE_THRESHOLD = 50;
   let touchStartY = null;
@@ -643,11 +630,11 @@ function setupTouchSwipe() {
   });
 }
 
-// ========== Fonction Principale d'Initialisation du Live Game ==========
+
 
 function initLiveGame(config) {
   return new Promise((resolve) => {
-    // Masquer les boutons tactiles si l'appareil n'est pas tactile.
+    
     if (!isTouchDevice()) {
       const touchControls = document.querySelector('.touch-controls');
       if (touchControls) {
@@ -655,12 +642,12 @@ function initLiveGame(config) {
       }
     }
 
-    // 1) Préparer les éléments HTML
+    
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const startGameBtn = config.startGameSelector;
     
-    // 2) Gérer le bouton "Start" (optionnel)
+    
     if (startGameBtn && config.onStartGame) {
       startGameBtn.classList.add("active");
       startGameBtn.addEventListener('click', async () => {
@@ -668,7 +655,7 @@ function initLiveGame(config) {
       });
     }
 
-    // Variables de configuration du jeu
+    
     const collisionEffects = [];
     const EFFECT_DURATION = 300;
     const SPAWN_EFFECT_DURATION = 500;
@@ -695,20 +682,20 @@ function initLiveGame(config) {
       flash_effect: false
     };
 
-    // 3) Redimensionnement du canvas
+    
     window.addEventListener('resize', () => handleResize(canvas, ctx));
     window.addEventListener('load', () => handleResize(canvas, ctx));
     window.addEventListener('orientationchange', function() {
       setTimeout(() => handleResize(canvas, ctx), 100);
     });
-    handleResize(canvas, ctx);
+    setTimeout(() => handleResize(canvas, ctx), 100);
 
-    // 4) Gestion du swipe sur les appareils tactiles
+    
     if (isTouchDevice()) {
       setupTouchSwipe();
     }
 
-    // 5) Initialisation du WebSocket
+    
     const socket = new WebSocket(config.wsUrl);
     window.currentGameSocket = socket;
     let socketClosed = false;
@@ -717,14 +704,13 @@ function initLiveGame(config) {
       initializeTouchControls(config.userRole, socket);
     };
     socket.onclose = () => {
-      console.log("[live_game_utils] WebSocket connection closed.");
       socketClosed = true;
-      cancelAnimationFrame(animationId); // Arrête la boucle
+      cancelAnimationFrame(animationId); 
       resolve();
       return;
     };
 
-    // 6) Gestion des messages reçus du WebSocket
+    
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
   
@@ -771,7 +757,6 @@ function initLiveGame(config) {
           }
         }
       } else if (data.type === 'game_over' || data.type === 'game_aborted' ) {
-        console.log('game over or aborted detected');
         socket.close();
         resolve();
       } 
@@ -794,12 +779,12 @@ function initLiveGame(config) {
       }
     };
 
-    // 7) Gestion du clavier pour les appareils non tactiles
+    
     if (!isTouchDevice()) {
       setupKeyboardControls(config.userRole, socket);
     }
 
-    // 8) Préparer les images pour les powerups et le bumper
+    
     const powerupImages = {
       'invert': new Image(),
       'shrink': new Image(),
@@ -812,7 +797,7 @@ function initLiveGame(config) {
     const bumperImage = new Image();
     bumperImage.src = createBumperSVG();
 
-    // 9) Boucle de dessin (animation)
+    
     function draw() {
       if (socketClosed === true) return;
       if (gameState.flash_effect) {
@@ -822,12 +807,12 @@ function initLiveGame(config) {
         ctx.fillStyle = '#101A32';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-        // Zone de jeu
+        
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 2;
         ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
   
-        // Dessin des raquettes
+        
         ['left', 'right'].forEach(side => {
           ctx.save();
           if (activeEffects[side].size > 0) {
@@ -841,7 +826,7 @@ function initLiveGame(config) {
                 'flash': '#FFFF00'
               }[effect];
               ctx.shadowColor = glowColor;
-              ctx.shadowBlur = 10; // La variable "scale" n'étant pas disponible ici, on laisse la valeur fixe
+              ctx.shadowBlur = 10; 
             });
           }
           ctx.fillStyle = 'white';
@@ -853,13 +838,13 @@ function initLiveGame(config) {
           ctx.restore();
         });
   
-        // Dessin de la balle
+        
         ctx.fillStyle = 'white';
         ctx.beginPath();
         ctx.arc(gameState.ball_x, gameState.ball_y, gameState.ball_size, 0, 2 * Math.PI);
         ctx.fill();
   
-        // Dessin des powerups
+        
         gameState.powerups.forEach(orb => {
           const type = orb.type || 'speed';
           const img = powerupImages[type];
@@ -880,7 +865,7 @@ function initLiveGame(config) {
           }
         });
   
-        // Dessin des bumpers
+        
         gameState.bumpers.forEach(bmp => {
           if (bumperImage.complete) {
             ctx.save();
@@ -897,13 +882,12 @@ function initLiveGame(config) {
       drawCountdown(ctx, canvas, gameState);
       drawScored(ctx, canvas, gameState);
   
-      console.log(`frame => ${socketClosed}`);
       animationId = requestAnimationFrame(draw);
 
     }
     draw();
   
-    // Retourne un objet permettant d'accéder au socket et à l'état du jeu
+    
     return {
       socket,
       getGameState: () => gameState

@@ -2,7 +2,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import GameParameters, LocalTournament, TournamentParameters
-from django.utils.translation import gettext as _  # Import pour la traduction
+from django.utils.translation import gettext as _  
 
 class GameParametersForm(forms.ModelForm):
     class Meta:
@@ -22,14 +22,12 @@ class GameParametersForm(forms.ModelForm):
         }
 
     def clean(self):
-        # Vous pouvez ajouter ici d'éventuelles validations supplémentaires si nécessaire
         cleaned_data = super().clean()
-        # Par exemple, on pourrait vérifier que ball_speed et paddle_size sont des valeurs attendues (les choix le garantissent déjà)
         return cleaned_data
 
 
 class TournamentParametersForm(forms.ModelForm):
-    # Définition des choix pour les paramètres de tournoi
+
     BALL_SPEED_CHOICES = [(1, 'Slow'), (2, 'Medium'), (3, 'Fast')]
     PADDLE_SIZE_CHOICES = [(1, 'Small'), (2, 'Medium'), (3, 'Large')]
 
@@ -58,8 +56,6 @@ class TournamentParametersForm(forms.ModelForm):
         player2 = (cleaned_data.get('player2') or "").strip()
         player3 = (cleaned_data.get('player3') or "").strip()
         player4 = (cleaned_data.get('player4') or "").strip()
-
-        # Affecte les valeurs nettoyées dans cleaned_data
         cleaned_data['player1'] = player1
         cleaned_data['player2'] = player2
         cleaned_data['player3'] = player3

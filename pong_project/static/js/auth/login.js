@@ -11,7 +11,6 @@ async function handleLoginResponse(response) {
     if (response.requires_2fa) {
       navigateTo('/login-2fa');
     } else {
-      // Pour une sécurité accrue, envisagez d'utiliser un mécanisme de stockage plus sécurisé que le localStorage
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
       setTimeout(async () => {

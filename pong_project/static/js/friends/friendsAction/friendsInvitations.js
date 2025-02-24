@@ -3,14 +3,7 @@ import { requestPost } from '../../api/index.js';
 import { refreshBurgerMenu } from '../../navbar/loadNavbar.js';
 import { showStatusMessage } from '../../tools/index.js';
 
-/**
- * Traite la demande d'invitation d'ami.
- *
- * @param {string} requestId - L'ID de la demande d'ami.
- * @param {string} action - L'action à effectuer (par exemple, "accept" ou "decline").
- * @returns {Promise<Object>} La réponse de l'API.
- * @throws {Error} En cas d'échec du traitement.
- */
+
 async function processFriendInvitation(requestId, action) {
   const formData = new FormData();
   formData.append('request_id', requestId);
@@ -23,12 +16,6 @@ async function processFriendInvitation(requestId, action) {
   return response;
 }
 
-/**
- * Gère la demande d'invitation d'ami en appelant le traitement et en mettant à jour l'interface.
- *
- * @param {string} requestId - L'ID de la demande d'ami.
- * @param {string} action - L'action à effectuer.
- */
 export async function handleFriendInvitation(requestId, action) {
   try {
     const response = await processFriendInvitation(requestId, action);

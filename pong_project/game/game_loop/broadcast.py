@@ -1,15 +1,15 @@
-# game/game_loop/broadcast.py
+
 
 from channels.layers import get_channel_layer
 from .redis_utils import get_key
 
 
-# --------- GAME STATE : NOTIFICATIONS -----------
+
 async def broadcast_game_state(game_id, channel_layer, paddle_left, paddle_right, ball, powerup_orbs, bumpers):
     """
     Envoie l'état actuel du jeu aux clients via WebSocket.
     """
-    # Récupérer les états des power-ups
+    
     powerups_data = []
     for powerup_orb in powerup_orbs:
         active = get_key(game_id, f"powerup_{powerup_orb.effect_type}_active" or 0)
@@ -20,11 +20,11 @@ async def broadcast_game_state(game_id, channel_layer, paddle_left, paddle_right
                 'type': powerup_orb.effect_type,
                 'x': x,
                 'y': y,
-                'color': list(powerup_orb.color)  # Convertir en liste pour JSON
+                'color': list(powerup_orb.color)  
             })
 
-    # Récupérer les états des bumpers
-    # print(f"[game_loop.py] bumpers to send: {bumpers}")
+    
+    
     bumpers_data = []
     for bumper in bumpers:
         active = get_key(game_id, f"bumper_{bumper.x}_{bumper.y}_active" or 0)
@@ -35,7 +35,7 @@ async def broadcast_game_state(game_id, channel_layer, paddle_left, paddle_right
                 'x': x,
                 'y': y,
                 'size': bumper.size,
-                'color': list(bumper.color)  # Convertir en liste pour JSON
+                'color': list(bumper.color)  
             })
 
     data = {
@@ -56,18 +56,18 @@ async def broadcast_game_state(game_id, channel_layer, paddle_left, paddle_right
         'bumpers': bumpers_data,
         'flash_effect': bool(get_key(game_id, f"flash_effect"))
     }
-    # IMPROVE le flash effect peut etre renvoye en notif powerup applied
+    
 
     await channel_layer.group_send(f"pong_{game_id}", {
         'type': 'broadcast_game_state',
         'data': data
     })
-    # print(f"[game_loop.py] Broadcast game_state for game_id={game_id}")
+    
 
 
 
 
-# --------- POWER UPS : NOTIFICATIONS -----------
+
 async def notify_powerup_spawned(game_id, powerup_orb):
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
@@ -130,7 +130,7 @@ async def notify_powerup_expired(game_id, powerup_orb):
         }
     )
 
-# --------- BUMPERS : NOTIFICATIONS -----------
+
 async def notify_bumper_spawned(game_id, bumper):
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
@@ -158,7 +158,7 @@ async def notify_bumper_expired(game_id, bumper):
         }
     )
 
-# --------- COLLISIONS : NOTIFICATIONS -----------
+
 async def notify_collision(game_id, collision_info):
     channel_layer = get_channel_layer()
     await channel_layer.group_send(
@@ -202,11 +202,11 @@ async def notify_bumper_collision(game_id, bumper, ball):
 
 
 
-# --------- END GAME : NOTIFICATIONS  -----------
+
 
 async def notify_game_finished(game_id, tournament_id, winner, looser):
-    # Si winner et looser sont des objets CustomUser, on récupère leur username,
-    # sinon on les laisse tels quels (cas d'un match en mode local, où ce sont déjà des chaînes)
+    
+    
     winner_serializable = winner.username if hasattr(winner, 'username') else winner
     looser_serializable = looser.username if hasattr(looser, 'username') else looser
 

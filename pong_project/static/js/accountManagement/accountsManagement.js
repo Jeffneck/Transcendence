@@ -21,7 +21,6 @@ async function loadAccountsManagement() {
 export async function handleAccountsManagement() {
   const accountsManagementLoaded = await loadAccountsManagement();
   if (accountsManagementLoaded) {
-    // Attache les événements spécifiques à la gestion de profil
     initializeaccountsManagementFormHandlers();
   }
 }

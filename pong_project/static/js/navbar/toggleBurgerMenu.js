@@ -2,7 +2,6 @@
 import { refreshBurgerMenu } from './loadNavbar.js';
 
 export async function toggleBurgerMenu(flag) {
-  console.debug('toggleBurgerMenu appelé');
   const menu = document.getElementById('burger-menu');
   const overlay = document.getElementById('overlay');
   if (flag === 'refresh btn') return;

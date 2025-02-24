@@ -2,12 +2,7 @@
 import { requestPost } from '../api/index.js';
 import { clearSessionAndUI, showStatusMessage } from '../tools/index.js';
 
-/**
- * Affiche le modal de suppression de compte et retourne sa référence.
- * @param {string} modalId - L'ID du modal à afficher.
- * @returns {HTMLElement} Le modal affiché.
- * @throws {Error} Si le modal n'est pas trouvé.
- */
+
 function showModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) {
@@ -17,13 +12,7 @@ function showModal(modalId) {
   return modal;
 }
 
-/**
- * Attache les événements pour fermer le modal :
- * - Clic sur le bouton de fermeture
- * - Clic en dehors du contenu du modal
- * Lors de la fermeture, l'utilisateur est redirigé vers la page précédente.
- * @param {HTMLElement} modal - Le modal concerné.
- */
+
 function attachModalCloseEvents(modal) {
   const closeBtn = modal.querySelector('.close-btn');
   if (closeBtn) {
@@ -40,11 +29,7 @@ function attachModalCloseEvents(modal) {
   });
 }
 
-/**
- * Envoie la requête de suppression du compte via POST et, en cas de succès,
- * affiche un message et nettoie la session après 1,5 seconde.
- * @param {HTMLFormElement} form - Le formulaire de suppression.
- */
+
 async function submitDeleteAccount(form) {
   try {
     const formData = new FormData(form);
@@ -59,10 +44,7 @@ async function submitDeleteAccount(form) {
   }
 }
 
-/**
- * Gère l'affichage et la logique de suppression de compte.
- * Charge la vue, attache les événements et gère la soumission du formulaire.
- */
+
 export async function handleDeleteAccount() {
   try {
     const modal = showModal('delete-account-modal');

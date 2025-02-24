@@ -8,7 +8,5 @@ export async function initializeNotFoundView() {
     if (response.status === 'success') {
       updateHtmlContent('#content', response.html);
     }
-  } catch (error) {
-    console.error("Erreur dans initializeNotFoundView :", error);
-  }
+  } catch (error) {}
 }

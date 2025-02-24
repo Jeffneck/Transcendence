@@ -20,7 +20,7 @@ class CreateGameLocalView(View):
     """
     def post(self, request, *args, **kwargs):
         try:
-            # Si l'utilisateur tente d'utiliser un mode tactile non supporté
+            
             if request.POST.get('is_touch', 'false') == "true":
                 return JsonResponse({'status': 'error', 'message': _('Mode non disponible pour le tactile')}, status=403)
             
@@ -30,7 +30,7 @@ class CreateGameLocalView(View):
                 return JsonResponse({'status': 'error', 'message': _("Les paramètres du jeu sont invalides.")}, status=400)
             
             session = GameSession.objects.create(status='waiting', is_online=False)
-            # Valeurs par défaut pour une partie locale
+            
             session.player_left_local = "PLAYER 1"
             session.player_right_local = "PLAYER 2"
             session.save()

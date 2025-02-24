@@ -1,47 +1,4 @@
 "use strict";
-export function displaySuccessMessage(elementId, message) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = message;
-    element.style.color = 'green';
-    element.style.display = 'block';
-  } else {
-    console.warn(`Élément ${elementId} introuvable.`);
-  }
-}
-
-export function displayErrorMessage(elementId, message) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = message;
-    element.style.color = 'red';
-    element.style.display = 'block';
-  } else {
-    console.warn(`Élément ${elementId} introuvable.`);
-  }
-}
-
-export function displayInfoMessage(elementId, message) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = message;
-    element.style.color = 'blue';
-    element.style.display = 'block';
-  } else {
-    console.warn(`Élément ${elementId} introuvable.`);
-  }
-}
-
-export function clearMessage(elementId) {
-  const element = document.getElementById(elementId);
-  if (element) {
-    element.textContent = '';
-    element.style.display = 'none';
-  } else {
-    console.warn(`Élément ${elementId} introuvable.`);
-  }
-}
-
 export function showStatusMessage(message, status) {
   const popup = document.getElementById('popup');
   const info = document.getElementById('info');

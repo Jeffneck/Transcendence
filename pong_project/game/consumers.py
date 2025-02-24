@@ -1,4 +1,4 @@
-# game/consumers.py
+
 
 import json
 import redis
@@ -36,67 +36,42 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @login_required_json_async
     async def disconnect(self, close_code):
-        # partie annullee dès la première déconnexion :
+        
         print(f"[PongConsumer] => disconnect => stop_game({self.game_id})")
-        await stop_game(self.game_id)  # Annule la task asyncio côté server
+        await stop_game(self.game_id)  
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
-    
-
-    # async def receive(self, text_data=None, bytes_data=None):
-    #     data = json.loads(text_data)
-    #     action = data.get('action')
-    #     player = data.get('player')
-
-    #     if action == 'start_move':
-    #         direction = data.get('direction')  # 'up' ou 'down'
-    #         self.start_move_paddle(player, direction)
-
-    #     elif action == 'stop_move':
-    #         self.stop_move_paddle(player)
     @login_required_json_async
     async def receive(self, text_data=None, bytes_data=None):
         try:
-            # Tenter de charger le JSON
+            
             data = json.loads(text_data)
 
-            # Vérifier si l'action est valide
+            
             action = data.get('action')
             if action not in ['start_move', 'stop_move']:
-                # Si l'action n'est pas valide, l'ignorer
                 return
-
-            # Vérifier si le joueur est valide
             player = data.get('player')
             if player not in ['left', 'right']:
-                # Si le joueur n'est pas valide, l'ignorer
                 return
-
-            # Vérifier si la direction est présente et valide pour l'action 'start_move'
             if action == 'start_move':
                 direction = data.get('direction')
                 if direction not in ['up', 'down']:
-                    # Si la direction n'est pas valide, l'ignorer
                     return
-
-            # Si on est ici, cela signifie que les données sont valides
-            # Procéder à l'action en fonction de l'action (start_move ou stop_move)
             if action == 'start_move':
                 self.start_move_paddle(player, direction)
             elif action == 'stop_move':
                 self.stop_move_paddle(player)
 
         except json.JSONDecodeError:
-            # Gérer les erreurs de décodage JSON si le JSON est mal formé
             pass
         except KeyError:
-            # Gérer les erreurs d'absence de clés nécessaires (ce cas devrait être évité grâce aux conditions ci-dessus)
             pass
 
     def start_move_paddle(self, player, direction):
         velocity = 0
         if direction == 'up':
-            velocity = -8  # Ajustez la vitesse selon vos préférences
+            velocity = -8  
         elif direction == 'down':
             velocity = 8
 
@@ -107,24 +82,24 @@ class PongConsumer(AsyncWebsocketConsumer):
         r.set(f"{self.game_id}:paddle_{player}_velocity", 0)
         print(f"[PongConsumer] stop_move_paddle: player={player}")
 
-    # Handlers pour les événements du groupe
+    
     async def broadcast_game_state(self, event):
         await self.send(json.dumps(event['data']))
-        # print(f"[PongConsumer] Broadcast game_state for game_id={self.game_id}")
+        
 
     async def game_over(self, event):
         winner = event['winner']
         looser = event['looser']
-        # tournament_id = event['tournament_id']
+        
 
-        # Préparer le JSON de réponse
+        
         response_data = {
             'type': 'game_over',
             'winner': winner,
             'looser': looser
         }
 
-        # Envoyer le JSON au client WebSocket
+
         await self.send(text_data=json.dumps(response_data))
 
     async def powerup_applied(self, event):
@@ -156,12 +131,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             'scoreMsg': event['scoreMsg']
         }))
         print(f"[PongConsumer] Broadcast countdown for game_id={self.game_id}")
-    
-    # async def start_game(self, event):
-    #     await self.send(json.dumps({
-    #         'type': 'start_game',
-    #     }))
-    #     print(f"[PongConsumer] Broadcast start_game for game_id={self.game_id}")
 
     async def powerup_expired(self, event):
         await self.send(json.dumps({
@@ -196,6 +165,3 @@ class PongConsumer(AsyncWebsocketConsumer):
             'type': 'game_aborted',
         }))
         print(f"[PongConsumer] game_aborted for game_id={self.game_id}")
-
-
-# [IMPROVE] adapter le consummer  aux notifications envoyees par broadcast.py

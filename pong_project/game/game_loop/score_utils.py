@@ -12,23 +12,23 @@ from .bumpers_utils import handle_bumpers_spawn, delete_bumper_redis
 WIN_SCORE = 3 
 
 
-async def reset_all_objects(game_id, powerup_orbs, bumpers): # / added
+async def reset_all_objects(game_id, powerup_orbs, bumpers):
     """Reset all active powerups and bumpers when a point is scored."""
-    # Reset all powerups
+   
     for powerup in powerup_orbs:
         if powerup.active:
             delete_powerup_redis(game_id, powerup)
             powerup.deactivate()
             await notify_powerup_expired(game_id, powerup)
 
-    # Reset all bumpers
+   
     for bumper in bumpers:
         if bumper.active:
             delete_bumper_redis(game_id, bumper)
             bumper.deactivate()
             await notify_bumper_expired(game_id, bumper)
 
-    # Reset any active effects
+   
     keys_to_delete = [
         "paddle_left_sticky", "paddle_right_sticky",
         "paddle_left_inverted", "paddle_right_inverted",
@@ -39,7 +39,7 @@ async def reset_all_objects(game_id, powerup_orbs, bumpers): # / added
     for key in keys_to_delete:
         delete_key(game_id, key)
 
-    # Reset paddle heights to initial values
+   
     initial_height = float(get_key(game_id, "initial_paddle_height"))
     set_key(game_id, "paddle_left_height", initial_height)
     set_key(game_id, "paddle_right_height", initial_height)
@@ -68,21 +68,21 @@ def winner_detected(game_id):
     return False
 
 async def finish_game(game_id):
-    # Récupérer les scores depuis Redis
+   
     score_left = int(get_key(game_id, "score_left") or 0)
     score_right = int(get_key(game_id, "score_right") or 0)
 
-    # Marquer la session comme terminée et récupérer ses informations
+   
     gameSession = await set_gameSession_status(game_id, "finished")
     if not gameSession:
         print(f"[finish_game] GameSession {game_id} does not exist.")
         return
 
-    # Pour être sûr que les attributs player_left et player_right sont préchargés,
-    # vérifiez qu'ils ne déclenchent pas de requête additionnelle.
-    # Ici, ils ont été chargés grâce au select_related dans set_gameSession_status.
+   
+   
+   
 
-    # Si la GameSession est Online, créer un enregistrement des gameResults
+   
     if score_left > score_right:
         winner = gameSession.player_left
         winner_local = gameSession.player_left_local
@@ -105,7 +105,7 @@ async def finish_game(game_id):
     gameSession_isOnline = await is_online_gameSession(game_id)
     await create_gameResults(game_id, gameSession_isOnline, endgame_infos)
 
-    # Gestion du tournoi (inchangé)
+   
     tournament = await get_LocalTournament(game_id, "semifinal1")
     if tournament:
         print(f"[finish_game] this game was semifinal1 from tournament game_id={game_id}")

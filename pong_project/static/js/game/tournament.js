@@ -2,11 +2,10 @@ import { requestGet, requestPost } from "../api/index.js";
 import { isTouchDevice, showStatusMessage, updateHtmlContent } from "../tools/index.js";
 import { launchLiveGameWithOptions } from './live_game.js';
 import { TournamentNextMatch } from './tournament_utils.js';
-import { showResults } from "./gameResults.js";
 import { navigateTo} from "../router.js";
 
 
-// Fonction principale appelée quand on clique sur "Lancer Tournoi" dans le menu
+
 export async function handleTournament() {
 
 	if (typeof localStorage !== "undefined" && !localStorage.getItem('access_token')) {
@@ -24,33 +23,31 @@ export async function handleTournament() {
 	try {
 		tournamentParam = JSON.parse(tournamentParam);
 	} catch (e) {
-		showStatusMessage("Erreur lors de la recuperation des Paramètres.", 'error'); //[IMPROVE]
+		showStatusMessage("Erreur lors de la recuperation des Paramètres.", 'error'); 
 		return;
 	}
 	
-		//console.log("Tournament param est égale a :", tournamentParam);
-		// 1) Récupère le formulaire (GET)
+		
 	const formHtml = await getTournamentForm();
 	if (!formHtml)
 		return;
 	updateHtmlContent('#content', formHtml);
 
-	// 2) Sélection du form dans le DOM
+	
 	const form = document.querySelector('#content form');
 	if (!form) {
-		console.error("Formulaire introuvable dans le HTML injecté.");
 		return;
 	}
 
-	// 3) Au submit => POST de création du tournoi
+	
 	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 
-		// Récupération des champs du form
+		
 		const formData = new FormData(form);
 
-		// Si vous avez d’autres paramètres passés depuis un menu (tournamentParam),
-		// on peut forcer/écraser ici dans le formData :
+		
+		
 		if (tournamentParam) {
 		formData.set('ball_speed', tournamentParam.ball_speed);
 		formData.set('paddle_size', tournamentParam.paddle_size);
@@ -62,17 +59,15 @@ export async function handleTournament() {
 		try {
       const response = await createTournament(formData);
       if (response.status === 'success') {
-        // Lance la suite (loop + affichage bracket + next match etc.)
+        
         await runTournamentFlow(response.tournament_id);
       }}
-    catch (error) {
-		console.error("Erreur lors de la création du tournoi :", error);
-		}
+    catch (error) {}
 	
   });
 }
 
-// -- Petites fonctions factorielles pour clarifier --
+
 
 async function getTournamentForm() {
   const responseGet = await requestGet('game', 'create_tournament');
@@ -88,25 +83,23 @@ async function getTournamentForm() {
 }
 
 async function createTournament(formData) {
-  // Appel POST vers /game/create_tournament
+  
   return await requestPost('game', 'create_tournament', formData);
 }
 
-// -- Le “flow” du tournoi (récup bracket, next match, etc.) --
+
 
 async function runTournamentFlow(tournamentId) {
-	window.stopTournamentFlow = false; // Réinitialise au lancement du tournoi
+	window.stopTournamentFlow = false; 
   
 	while (true) {
 	  if (window.stopTournamentFlow) {
-		//console.log("Flux tournoi arrêté car l'utilisateur est revenu à la Home.");
 		break;
 	  }
   
-	  // 1) Afficher le bracket
+	  
 	  const bracketResp = await requestGet('game', `tournament_bracket/${tournamentId}`);
 	  if (!bracketResp || bracketResp.status !== "success" || window.stopTournamentFlow) {
-		console.error("Impossible de récupérer le bracket du tournoi ou tournoi annulé.");
 		break;
 	  }
   
@@ -115,19 +108,16 @@ async function runTournamentFlow(tournamentId) {
 	  await delay(3000);
 
 	  if (bracketResp.tournament_status === "finished" || window.stopTournamentFlow) {
-		//console.log("Tournoi terminé ou arrêté.");
 		break;
 	  }
   
-	  // 2) Récupérer les joueurs du prochain match
+	  
 	  const nextResp = await requestGet('game', `tournament_next_game/${tournamentId}`);
 	  if (!nextResp || nextResp.status !== "success" || window.stopTournamentFlow) {
-		console.error("Impossible de récupérer le prochain match ou tournoi annulé.");
 		break;
 	  }
   
 	  if (nextResp.next_match_type === "finished" || window.stopTournamentFlow) {
-		//console.log("Tournoi terminé.");
 		break;
 	  }
   
@@ -136,45 +126,42 @@ async function runTournamentFlow(tournamentId) {
 	  TournamentNextMatch();
 	  await delay(3000);
   
-	  // 3) Créer la gameSession de match
+	  
 	  const gameId = await createTournamentGameSession(tournamentId, nextResp.next_match_type);
 	  if (!gameId || window.stopTournamentFlow) {
 		showStatusMessage('Tournoi annulé ...', 'error');
-		console.error("Erreur lors de la création de la session de match ou tournoi annulé.");
 		break;
 	  }
   
-	  // 4) Lancer le liveGame 
+	  
 	  await launchLiveGameWithOptions(gameId, 'both', `start_tournament_game_session/${gameId}`);
 	  
-	  // Vérification du statut
+	  
 	  const statusResponse = await requestGet('game', `get_game_status/${gameId}`);
 	  if (statusResponse.status === 'error' || statusResponse.session_status !== 'finished' || window.stopTournamentFlow) {
 		showStatusMessage('Tournoi annulé ...', 'error');
-		//console.log("Tournoi annulé ou statut non terminé.");
 		break;
 	  }
 	}
   
 	sessionStorage.removeItem('tournamentparams');
-	//console.log("Fin du flux tournoi");
   }
 
 
 function updateNextGameUI(bracketResp, nextResp) {
-	// Récupère le type de match prochain (ex. "semifinal1", "semifinal2" ou "final")
+	
 	const matchType = nextResp.next_match_type;
 	
-	// Variables pour le joueur de gauche (avatar1) et celui de droite (avatar2)
+	
 	let leftPlayerName = "";
 	let rightPlayerName = "";
 	let leftPlayerAvatar = "";
 	let rightPlayerAvatar = "";
 	
-	// Récupère le dictionnaire des avatars envoyé par le serveur
+	
 	const avatars = bracketResp.player_avatars;
 	
-	// Adaptation du switch aux valeurs renvoyées par la vue
+	
 	switch(matchType) {
 	  case "semifinal1":
 		leftPlayerName = bracketResp.player1;
@@ -189,19 +176,18 @@ function updateNextGameUI(bracketResp, nextResp) {
 		rightPlayerAvatar = avatars[bracketResp.player4];
 		break;
 	  case "final":
-		// Pour le final, on utilise les gagnants des demi-finales
+		
 		leftPlayerName = bracketResp.winner_semifinal_1;
 		rightPlayerName = bracketResp.winner_semifinal_2;
 		leftPlayerAvatar = avatars[bracketResp.winner_semifinal_1] || "/static/svg/default_avatar.svg";
 		rightPlayerAvatar = avatars[bracketResp.winner_semifinal_2] || "/static/svg/default_avatar.svg";
 		break;
 	  default:
-		console.error("Type de match inconnu :", matchType);
 		return;
 	}
 	
-	// Mise à jour des éléments du DOM :
-	// avatar1 correspond au joueur de gauche et avatar2 au joueur de droite.
+	
+	
 	const leftAvatarImg = document.querySelector(".avatar1 img.avatar");
 	const leftNameElem = document.querySelector(".avatar1 .player-name");
 	const rightAvatarImg = document.querySelector(".avatar2 img.avatar");
@@ -219,16 +205,12 @@ function updateNextGameUI(bracketResp, nextResp) {
 	if (rightNameElem) {
 	  rightNameElem.textContent = rightPlayerName;
 	}
-	
-	//console.log("Next match type:", matchType);
-	//console.log("Gauche :", leftPlayerName, leftPlayerAvatar);
-	//console.log("Droite :", rightPlayerName, rightPlayerAvatar);
   }
 
 
 
-// Met à jour le bracket en fonction de l'état du tournoi
-// Improve remplacer par des balises django dans le front ??
+
+
 function updateBracketUI(bracketResp) {
 	const status = bracketResp.tournament_status;
 	const name = bracketResp.tournament_name;
@@ -236,18 +218,16 @@ function updateBracketUI(bracketResp) {
 	const winnerSemi2 = bracketResp.winner_semifinal_2;
 	const winnerFinal = bracketResp.winner_final;
 
-	//console.log("updateBracketUI status:", status, "winnerSemi1:", winnerSemi1, "winnerSemi2:", winnerSemi2, "winnerFinal:", winnerFinal);
-	//console.log("updateBracketUI status: eclair ? ",document.querySelector('.eclair.match-1'));
-	// Récupère le dictionnaire des avatars depuis le JSON
+	
 	const playerAvatars = bracketResp.player_avatars;
 	
-	// Mettez à jour le titre avec le nom du tournoi
+	
     document.querySelector('.title-choosen').textContent = name
 
-	// Masque tous les paragraphes d'état
+	
 	document.querySelectorAll('.tournament-title p').forEach(p => p.classList.add('d-none'));
 	
-	// Mise à jour des avatars et noms pour chaque joueur
+	
 	document.querySelector('[data-player-id="1"] .avatar').src = playerAvatars[bracketResp.player1];
 	document.querySelector('[data-player-id="2"] .avatar').src = playerAvatars[bracketResp.player2];
 	document.querySelector('[data-player-id="3"] .avatar').src = playerAvatars[bracketResp.player3];
@@ -258,7 +238,7 @@ function updateBracketUI(bracketResp) {
 	document.querySelector('[data-player-id="3"] .player-name').textContent = bracketResp.player3;
 	document.querySelector('[data-player-id="4"] .player-name').textContent = bracketResp.player4;
 	
-	// Affichage contextuel selon l'état du tournoi
+	
 	if (status === "pending") {
 	  document.querySelector('.tournament-title p:nth-child(2)').classList.remove('d-none'); 
 	  document.querySelector('.eclair.match-1').classList.remove('d-none');
@@ -272,7 +252,7 @@ function updateBracketUI(bracketResp) {
 	  document.querySelector('.tournament-title p:nth-child(5)').classList.remove('d-none');
 	}
 	
-	// Affichage des gagnants des demi-finales
+	
 	if (winnerSemi1) {
 	  document.querySelector(".winner1").classList.remove("d-none");
 	  document.querySelector(".winner1 .avatar").src = playerAvatars[winnerSemi1];
@@ -285,24 +265,21 @@ function updateBracketUI(bracketResp) {
 	  document.querySelector(".winner2 .player-name").textContent = winnerSemi2;
 	}
 	
-	// Affichage du final
+	
 	if (winnerFinal) {
 	  const finalWinnerElem = document.querySelector(".winner3");
 	  finalWinnerElem.classList.remove("d-none");
   
 	  let finalAvatar = playerAvatars[winnerFinal];
 	  if (!finalAvatar) {
-		console.error("Avatar introuvable pour le final winner:", winnerFinal);
-		finalAvatar = "/static/svg/default_avatar.svg"; // Avatar par défaut
-	  } else {
-		//console.log("Final winner:", winnerFinal, "Avatar URL:", finalAvatar);
+		finalAvatar = "/static/svg/default_avatar.svg"; 
 	  }
 	  
 	  document.querySelector(".winner3 .avatar").src = finalAvatar;
 	  document.querySelector(".winner3 .winner-name").textContent = winnerFinal;
 	}
   }
-// Création de la session (POST vers /game/create_tournament_game_session/<tournament_id>)
+
 async function createTournamentGameSession(tournamentId, nextMatchType) {
   try {
     const formData = new FormData();
@@ -315,19 +292,17 @@ async function createTournamentGameSession(tournamentId, nextMatchType) {
     );
     if (response.status === 'success') {
       updateHtmlContent("#content", response.html);
-      return response.game_id; // On retourne juste l’ID
+      return response.game_id; 
     } else {
-      console.error("createTournamentGameSession error:", response.message);
       return null;
     }
   } catch (err) {
-    console.error("createTournamentGameSession exception:", err);
     return null;
   }
 }
 
 
-// Petit utilitaire de pause asynchrone
+
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

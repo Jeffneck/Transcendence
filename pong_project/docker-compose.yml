@@ -25,6 +25,8 @@ services:
       - .env
     expose:
       - "8000"
+    logging:
+      driver: "none"
     depends_on:
       - db
       - redis

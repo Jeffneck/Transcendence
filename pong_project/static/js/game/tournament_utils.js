@@ -2,7 +2,6 @@
 function updateSvgViewBox(mediaQuery) {
   const svg = document.getElementById('eclair-svg');
   if (!svg) {
-    console.warn("L'élément 'eclair-svg' est introuvable.");
     return;
   }
   if (mediaQuery.matches) {
@@ -15,7 +14,6 @@ function updateSvgViewBox(mediaQuery) {
 function updateSvgSize(mediaQuery) {
   const svg = document.getElementById('eclair-svg');
   if (!svg) {
-    console.warn("L'élément 'eclair-svg' est introuvable.");
     return;
   }
   if (mediaQuery.matches) {

@@ -5,7 +5,7 @@ import { HTTPError, ContentTypeError, NetworkError } from './apiErrors.js';
 import { showStatusMessage } from '../tools/displayInfo.js';
 import { clearSessionAndUI } from '../tools/clearSession.js';
 
-// Déconnexion forcée de l'utilisateur en cas d'erreur critique
+
 function forceLogout(message) {
   showStatusMessage(message, "error");
   setTimeout(() => { clearSessionAndUI(); }, 1000);
@@ -16,7 +16,7 @@ const Api = {
     try {
       const headers = { ...this.prepareHeaders(), ...customHeaders };
 
-      // Rafraîchissement du token si nécessaire
+      
       const jwtAccessToken = this.getJWTaccessToken();
       if (jwtAccessToken && this.isTokenExpiringSoon(jwtAccessToken)) {
         const newToken = await this.handleTokenRefresh();
@@ -30,7 +30,7 @@ const Api = {
 
       let response = await this.sendRequest(url, method, formData, headers);
 
-      // Gestion des erreurs d'authentification
+      
       if (response.status === 401) {
         const data = await response.json();
         if (data.error_code === "not_authenticated") {

@@ -1,36 +1,45 @@
-# Nom du projet (optionnel si tu veux l'utiliser en variable)
 PROJECT_NAME = pong_project
 
-# Fichier docker-compose (si besoin d'un chemin particulier)
 COMPOSE_FILE = docker-compose.yml
 
-# Par défaut, on peut définir une cible "up"
+.PHONY: up
 up:
-	docker compose -f $(COMPOSE_FILE) up 
+	@echo "Démarrage des conteneurs..."
+	@docker compose -f $(COMPOSE_FILE) up -d
 
-# Stopper et supprimer les conteneurs, réseaux et volumes
+.PHONY: stop
+stop:
+	@echo "Arrêt des conteneurs..."
+	@docker compose -f $(COMPOSE_FILE) stop
+
+.PHONY: down
 down:
-	docker compose -f $(COMPOSE_FILE) down
+	@echo "Arrêt et suppression des conteneurs..."
+	@docker compose -f $(COMPOSE_FILE) down
 
-# Stopper et supprimer conteneurs + volumes + orphelins
+.PHONY: clean
 clean:
-	docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
+	@echo "Nettoyage des conteneurs, volumes et orphelins..."
+	@docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
 
-# Reconstruire les images
+.PHONY: build
 build:
-	docker compose -f $(COMPOSE_FILE) build
+	@echo "Reconstruction des images..."
+	@docker compose -f $(COMPOSE_FILE) build
 
-# Nettoyer davantage (images dangling, etc.)
+.PHONY: prune
 prune:
-	docker system prune --all --force
-	docker volume prune --force
-	docker network prune --force
+	@echo "Suppression des données inutilisées..."
+	@docker system prune --all --force
+	@docker volume prune --force
+	@docker network prune --force
 
-# Exemple : tout refaire (clean + build + up)
+.PHONY: reset
 reset: clean build up
-	@echo "Containers and volumes removed, images rebuilt, environment is fresh!"
+	@echo "Containers et volumes supprimés, images reconstruites, environnement prêt !"
 
-# Shortcut : on peut remettre "docker compose down" si on veut juste effacer vite
+.PHONY: re
 re:
-	docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
-	docker compose -f $(COMPOSE_FILE) up 
+	@echo "Redémarrage complet des conteneurs..."
+	@docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
+	@docker compose -f $(COMPOSE_FILE) up -d

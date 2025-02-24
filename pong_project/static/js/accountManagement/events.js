@@ -9,13 +9,13 @@ async function handleLanguageChange(language) {
     formData.append('language', language);
     const data = await requestPost('accounts', 'set_language', formData);
     if (data.status === 'success') {
-      location.reload(); // Recharge la page pour appliquer la langue
+      location.reload(); 
     } else {
       showStatusMessage(`Erreur lors du changement de langue : ${data.message}`, 'error');
     }
   } catch (error) {
     showStatusMessage("Une erreur est survenue lors du changement de langue. Veuillez réessayer.", 'error');
-    // Vous pouvez également logger l'erreur en interne si nécessaire
+    
   }
 }
 
@@ -28,12 +28,12 @@ export function attachProfileEvents() {
     }
   };
 
-  // Boutons de navigation
+  
   bindEvent('#enable-2fa-btn', () => navigateTo('/enable-2fa'));
   bindEvent('#disable-2fa-btn', () => navigateTo('/disable-2fa'));
   bindEvent('#delete-account-btn', () => navigateTo('/delete-account'));
 
-  // Boutons de langue
+  
   document.querySelectorAll('button[data-lang]').forEach((button) => {
     if (!button.dataset.bound) {
       button.addEventListener('click', (event) => {

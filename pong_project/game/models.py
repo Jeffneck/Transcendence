@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.timezone import now, now as timezone_now
 from django.contrib.auth import get_user_model
 
-User = get_user_model()  # Utilisation dynamique du modèle utilisateur (CustomUser)
+User = get_user_model()  
 
 # -------------------
 # GAME SESSION & PARAMETERS
@@ -20,7 +20,6 @@ class GameSession(models.Model):
         ('waiting', 'Waiting'),
         ('running', 'Running'),
         ('finished', 'Finished'),
-        # Vous pouvez ajouter d'autres statuts si nécessaire.
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -29,11 +28,9 @@ class GameSession(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='waiting')
     is_online = models.BooleanField(default=False)
 
-    # Pour une partie en ligne : on lie des utilisateurs (CustomUser)
     player_left = models.ForeignKey(User, related_name='game_sessions_as_player_left', on_delete=models.CASCADE, null=True, blank=True)
     player_right = models.ForeignKey(User, related_name='game_sessions_as_player_right', on_delete=models.CASCADE, null=True, blank=True)
 
-    # Pour une partie locale : noms des joueurs
     player_left_local = models.CharField(max_length=50, null=True, blank=True)
     player_right_local = models.CharField(max_length=50, null=True, blank=True)
 

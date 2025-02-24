@@ -14,7 +14,6 @@ async function viewUserProfile() {
     }
     return true;
   } catch (error) {
-    console.error('Erreur dans viewUserProfile:', error);
     showStatusMessage('Erreur lors du chargement du profil utilisateur.', 'error');
     throw error;
   }
@@ -28,7 +27,6 @@ async function initializeProfileEvents() {
     }
     gestionBtn.addEventListener('click', () => navigateTo('/account'));
   } catch (error) {
-    console.error("Erreur dans initializeProfileEvents:", error);
     showStatusMessage('Erreur lors de l\'initialisation des événements du profil.', 'error');
     throw error;
   }
@@ -40,7 +38,6 @@ export async function handleViewProfile() {
     if (!loaded) return;
     await initializeProfileEvents();
   } catch (error) {
-    console.error('Erreur dans handleViewProfile:', error);
     showStatusMessage('Erreur lors du chargement du profil utilisateur.', 'error');
   }
 }

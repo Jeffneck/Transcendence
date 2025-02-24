@@ -40,20 +40,20 @@ from game.game_loop.models_utils import set_gameSession_status
 
 import asyncio
 
-ACTIVE_GAMES = {}   # { game_id: main_task }
-SUBTASKS = {}       # { game_id: set of subtasks }
+ACTIVE_GAMES = {}   
+SUBTASKS = {}       
 
 async def start_game_loop(game_id):
     from .game_loop.loop import game_loop
     task = asyncio.create_task(game_loop(game_id))
     ACTIVE_GAMES[str(game_id)] = task
-    SUBTASKS[str(game_id)] = set()  # Initialise le set pour les sous-tâches
+    SUBTASKS[str(game_id)] = set()  
 
     print(f"[tasks.py] Game loop started for game_id={game_id}")
     try:
         await task
     except asyncio.CancelledError:
-        print(f"[tasks.py] Game loop for game_id={game_id} was cancelled.")
+        print("")
     finally:
         del ACTIVE_GAMES[str(game_id)]
         SUBTASKS.pop(str(game_id), None)
@@ -65,7 +65,7 @@ def register_subtask(game_id, subtask):
         SUBTASKS[str(game_id)] = set()
     SUBTASKS[str(game_id)].add(subtask)
 
-     # Option : cleanup dès que la tâche est terminée
+     
     def _on_done(_):
         if game_id in SUBTASKS:
             SUBTASKS[str(game_id)].discard(subtask)
@@ -74,19 +74,15 @@ def register_subtask(game_id, subtask):
 
 async def stop_game(game_id):
     """Annule la tâche principale ET toutes les sous-tâches associées."""
-    # await set_gameSession_status(game_id, "cancelled")
+    
     main_task = ACTIVE_GAMES.get(str(game_id))
     if main_task:
         main_task.cancel()
         print(f"[stop_game] Annulation de la tâche principale pour game_id={game_id}")
-    # # Annuler toutes les sous-tâches
-    # subtasks = SUBTASKS.get(str(game_id), [])
-    # for st in subtasks:
-    #     st.cancel()
-    # Annule toutes les sous-tâches
+
     for st in SUBTASKS.get(str(game_id), []):
         st.cancel()
 
     SUBTASKS.pop(str(game_id), None)
     ACTIVE_GAMES.pop(str(game_id), None)
-    #print(f"[stop_game] {len(subtasks)} sous-tâches annulées pour game_id={game_id}")
+    

@@ -6,14 +6,12 @@ import { initBurgerMenuDelegation } from './delegation.js';
 import { eventsHandlerBurgerMenu } from '../burgerMenu/index.js';
 import { navigateTo } from '../router.js';
 
-//improve utiliser un flag pour signaler un refresh du DOM dans cette fonction est peut être un peu maladroit
-//Utiliser une fonction du type refreshDOMButtons serait peut être une meilleure idee
+
 async function initializeBurgerMenu(flag) {
   const burgerToggle = document.querySelector('#burger-menu-toggle');
   if (burgerToggle && !burgerToggle.dataset.bound) {
     burgerToggle.addEventListener('click', () => handleBurgerClick(flag));
     burgerToggle.dataset.bound = true;
-    console.debug('Burger menu events initialisés.');
   }
 }
 
@@ -28,7 +26,6 @@ function handleHomeButtonClick(isAuthenticated) {
 
 async function loadNavbar() {
   try {
-    console.debug('Chargement de la navbar...');
     const data = await requestGet('core', 'navbar');
     if (data && data.html) {
       updateHtmlContent('#navbar', data.html);
@@ -39,16 +36,12 @@ async function loadNavbar() {
       }
       return data.is_authenticated;
     } else {
-      console.error("Contenu de la navbar manquant.");
       showStatusMessage('Impossible de charger la barre de navigation.', 'error');
       return false;
     }
   } catch (error) {
-    console.error('Erreur dans loadNavbar:', error);
     showStatusMessage('Erreur lors du chargement de la navbar.', 'error');
     throw error;
-  } finally {
-    console.debug('Fin de loadNavbar.');
   }
 }
 
@@ -75,19 +68,16 @@ export async function refreshBurgerMenu() {
       }
       await initializeBurgerMenu('refresh btn');
       eventsHandlerBurgerMenu();
-      console.debug('Burger menu mis à jour.');
     } else {
-      console.warn('Erreur lors de la mise à jour du burger menu:', data.status);
     }
   } catch (error) {
-    console.error('Erreur dans refreshBurgerMenu:', error);
+    showStatusMessage('Erreur lors du chargement du burger menu.', 'error');
   }
 }
 
 
 export async function handleNavbar() {
   try {
-    console.debug('Chargement de la navbar...');
     const is_authenticated = await loadNavbar();
     if (is_authenticated) {
       await initializeBurgerMenu(null);
@@ -96,7 +86,6 @@ export async function handleNavbar() {
       setInterval(refreshBurgerMenu, 30000);
     }
   } catch (error) {
-    console.error('Erreur dans handleNavbar:', error);
     showStatusMessage('Erreur lors du chargement de la navbar.', 'error');
   }
 }

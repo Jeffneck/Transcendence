@@ -10,8 +10,5 @@ export async function showResults(gameId) {
     } else {
       showStatusMessage(response.message, 'error');
     }
-  } catch (error) {
-    console.error('Erreur dans showResults:', error);
-    showStatusMessage('Impossible d\'obtenir les résultats', 'error');
-  }
+  } catch (error) {}
 }

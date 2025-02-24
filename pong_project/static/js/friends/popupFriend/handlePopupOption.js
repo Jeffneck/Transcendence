@@ -3,11 +3,7 @@ import { handleRemoveFriend } from '../index.js';
 import { navigateTo } from '../../router.js';
 import { showStatusMessage } from '../../tools/index.js';
 
-/**
- * Gère l'action sélectionnée dans le popup d'options pour un ami.
- *
- * @param {string} option - L'option sélectionnée (ex. "Voir le profil", "Supprimer").
- */
+
 export function handleOptionPopup(option) {
   const friendNameElement = document.getElementById('popupFriendName');
   if (!friendNameElement) {

@@ -3,10 +3,7 @@ import { updateHtmlContent, showStatusMessage } from '../tools/index.js';
 import { requestGet } from '../api/index.js';
 import { navigateTo } from '../router.js';
 
-/**
- * Initialise la vue d'accueil du jeu.
- * Récupère le contenu HTML et attache les événements nécessaires.
- */
+
 export async function initializeGameHomeView() {
   try {
     const data = await requestGet('game', 'home');
@@ -21,7 +18,6 @@ export async function initializeGameHomeView() {
   
   const playBtn = document.querySelector('#play-btn-home');
   if (!playBtn) {
-    showStatusMessage('Bouton "Jouer" introuvable.', 'error');
     return;
   }
   

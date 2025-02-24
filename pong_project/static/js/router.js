@@ -9,7 +9,6 @@ import { handleNavbar } from './navbar/loadNavbar.js';
 import { initializeNotFoundView } from './tools/errorPage.js';
 
 
-// Initialisation du routeur Navigo
 const router = new window.Navigo('/', { hash: false });
 
 export function initializeRouter() {
@@ -37,7 +36,6 @@ export function initializeRouter() {
     })
     .notFound(() => { initializeNotFoundView(); });
 
-  // Intercepter "Page Précédente" 
   window.addEventListener("popstate", () => {
     stopCurrentActions()
     router.resolve();
@@ -47,22 +45,16 @@ export function initializeRouter() {
 }
 
 export function navigateTo(route) {
-    console.log(`Navigation vers ${route}`);
     stopCurrentActions()
     router.navigate(route);
 }
 
 
 function stopCurrentActions(){
-  console.log(` stopCurrentActions : websocket state ${window.currentGameSocket}`);
 
-    //IMPROVE (peut etre qu'il faut gerer cela ailleurs que dans le router) systeme qui arrete l'attente de l'acceptation d'une game invitation quand on change de route
-    //fermer le socket si une session de jeu est en cours 
     if (window.currentGameSocket && window.currentGameSocket.readyState === WebSocket.OPEN) {
-        console.log('Fermeture de la WebSocket en cours...');
         window.currentGameSocket.close();
     }
     window.currentGameSocket = null;
-    //si on etait dans une boucle de tournoi, on bloque l' affichage des pages suivantes
     window.stopTournamentFlow = true;
 }

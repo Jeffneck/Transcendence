@@ -18,7 +18,6 @@ async function handleFormSubmit(form, app, view, successMessage, successSelector
         setTimeout(() => { successElem.style.display = 'none'; }, 3000);
       }
       form.reset();
-      // Pour le changement de pseudo, on force la déconnexion
       if (successSelector === '#change-username-success') {
         await handleLogout();
         return;

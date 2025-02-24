@@ -1,7 +1,6 @@
 "use strict";
 import { navigateTo } from '../router.js';
 export function clearSessionAndUI(redirectUrl = '/') {
-  console.debug('Nettoyage de la session et de l\'UI...');
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   const navbar = document.querySelector('#navbar');
