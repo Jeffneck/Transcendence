@@ -55,7 +55,6 @@ async function submitDeleteAccount(form) {
     showStatusMessage('Votre compte a été supprimé avec succès.', 'success');
     setTimeout(clearSessionAndUI, 1500);
   } catch (error) {
-    console.error('Erreur dans submitDeleteAccount:', error);
     showStatusMessage('Une erreur est survenue lors de la suppression.', 'error');
   }
 }
@@ -66,7 +65,6 @@ async function submitDeleteAccount(form) {
  */
 export async function handleDeleteAccount() {
   try {
-    console.debug('Chargement de la vue de suppression...');
     const modal = showModal('delete-account-modal');
     attachModalCloseEvents(modal);
 
@@ -79,7 +77,7 @@ export async function handleDeleteAccount() {
       await submitDeleteAccount(deleteAccountForm);
     });
   } catch (error) {
-    console.error('Erreur dans handleDeleteAccount:', error);
-    showStatusMessage(error, 'error');
+    const errorMessage = typeof error === 'string' ? error : error.message || "Une erreur s'est produite.";
+    showStatusMessage(errorMessage, 'error');
   }
 }

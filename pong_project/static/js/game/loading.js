@@ -3,19 +3,26 @@ import { requestGet } from '../api/index.js';
 import { isTouchDevice } from '../tools/utility.js';
 import { updateHtmlContent } from '../tools/domHandler.js';
 import { initializeGameControls } from './controls.js';
-import { displayGame, displayTournamentBracket } from './display.js';
+import { showStatusMessage } from '../tools/index.js';
 
+/**
+ * Charge la vue de chargement du jeu et initialise les contrôles en fonction du dispositif.
+ *
+ * @param {number} participantCount - Nombre de participants (optionnel).
+ */
 export async function startLoading(participantCount) {
   try {
     const response = await requestGet('game', 'loading');
-    updateHtmlContent('#content', response.html);
-    if (isTouchDevice()) {
-      initializeGameControls('touch');
+    if (response && response.html) {
+      updateHtmlContent('#content', response.html);
     } else {
-      initializeGameControls('keyboard');
+      showStatusMessage('Données de chargement manquantes.', 'error');
+      return;
     }
-    // Vous pouvez activer le polling ou le déclenchement d'une action après un délai ici si nécessaire.
+    const controlType = isTouchDevice() ? 'touch' : 'keyboard';
+    initializeGameControls(controlType);
+    // Optionnel : activer le polling ou déclencher une action après un délai si nécessaire.
   } catch (error) {
-    console.error('Erreur dans startLoading:', error);
+    showStatusMessage('Erreur lors du chargement du jeu. Veuillez réessayer.', 'error');
   }
 }

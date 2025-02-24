@@ -1,4 +1,3 @@
-// static/js/2fa/login2fa.js
 "use strict";
 
 import { requestPost, requestGet } from '../../api/index.js';
@@ -12,7 +11,6 @@ async function submitLogin2FA(form) {
   try {
     const response = await requestPost('accounts', '2fa/login2fa', formData);
     if (response.status === 'success') {
-      console.debug("Connexion 2FA réussie.");
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
       setTimeout(async () => {
@@ -25,7 +23,6 @@ async function submitLogin2FA(form) {
       showStatusMessage(response.message || 'Code 2FA incorrect.', 'error');
     }
   } catch (error) {
-    console.error('Erreur lors de la soumission 2FA:', error);
     showStatusMessage(error.message || 'Erreur lors de la connexion 2FA.', 'error');
   }
 }
@@ -47,7 +44,6 @@ export async function initializeLogin2FAView() {
       navigateTo('/home');
       return;
     }
-    console.error('Erreur dans initializeLogin2FAView:', error);
     showStatusMessage('Impossible de charger la vue de connexion 2FA.', 'error');
   }
 }

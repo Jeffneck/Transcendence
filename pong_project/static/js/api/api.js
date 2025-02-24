@@ -1,4 +1,3 @@
-// static/js/api/index.js
 "use strict";
 
 import { navigateTo } from '../router.js';
@@ -13,14 +12,11 @@ function forceLogout(message) {
 }
 
 const Api = {
-  /**
-   * Exécute une requête HTTP en gérant le rafraîchissement du token si nécessaire.
-   */
   async request(url, method = "GET", formData = null, customHeaders = {}) {
     try {
       const headers = { ...this.prepareHeaders(), ...customHeaders };
 
-      // Vérifie si l’access token expire dans moins de 5 minutes et tente de le rafraîchir
+      // Rafraîchissement du token si nécessaire
       const jwtAccessToken = this.getJWTaccessToken();
       if (jwtAccessToken && this.isTokenExpiringSoon(jwtAccessToken)) {
         const newToken = await this.handleTokenRefresh();
@@ -34,7 +30,7 @@ const Api = {
 
       let response = await this.sendRequest(url, method, formData, headers);
 
-      // Gestion des statuts 401 et 403
+      // Gestion des erreurs d'authentification
       if (response.status === 401) {
         const data = await response.json();
         if (data.error_code === "not_authenticated") {
@@ -205,29 +201,17 @@ const Api = {
 
 export async function requestGet(app, view) {
   const url = `/${app}/${view}/`;
-  try {
-    return await Api.get(url);
-  } catch (error) {
-    throw error;
-  }
+  return Api.get(url);
 }
 
 export async function requestPost(app, view, formData) {
   const url = `/${app}/${view}/`;
-  try {
-    return await Api.post(url, formData);
-  } catch (error) {
-    throw error;
-  }
+  return Api.post(url, formData);
 }
 
 export async function requestDelete(app, view, resourceId) {
   const url = `/${app}/${view}/${resourceId}/`;
-  try {
-    return await Api.delete(url);
-  } catch (error) {
-    throw error;
-  }
+  return Api.delete(url);
 }
 
 export { RequestError, HTTPError, ContentTypeError, NetworkError } from "./apiErrors.js";

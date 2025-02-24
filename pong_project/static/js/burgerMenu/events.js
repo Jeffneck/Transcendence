@@ -1,15 +1,20 @@
 "use strict";
-import { showFriendPopup, closePopupOnClickOutside, handleOptionPopup, handleAddFriend, handleFriendInvitation } from '../friends/index.js';
+
+import { 
+  showFriendPopup, 
+  closePopupOnClickOutside, 
+  handleOptionPopup, 
+  handleAddFriend, 
+  handleFriendInvitation 
+} from '../friends/index.js';
 import { handleStatusChange } from './setupStatus.js';
 import { handleLogout } from '../auth/index.js';
 import { navigateTo } from '../router.js';
 import { acceptGameInvitation, declineGameInvitation } from '../game/index.js';
 
 export function eventsHandlerBurgerMenu() {
-  console.debug('Initialisation des événements du burger menu...');
   const container = document.getElementById('burger-menu-container');
   if (!container) {
-    console.warn("Conteneur #burger-menu-container introuvable.");
     return;
   }
   if (!container.dataset.bound) {
@@ -26,7 +31,6 @@ export function eventsHandlerBurgerMenu() {
     document.addEventListener('click', closePopupOnClickOutside);
     popup.dataset.bound = 'true';
   }
-  console.debug('Gestionnaire d\'événements du burger menu initialisé.');
 }
 
 function handleBurgerMenuClick(e) {

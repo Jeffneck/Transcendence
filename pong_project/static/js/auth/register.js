@@ -52,7 +52,6 @@ export async function initializeRegisterView() {
       navigateTo('/home');
       return;
     }
-    console.error('Erreur dans initializeRegisterView :', error);
     showStatusMessage('Impossible de charger la vue d\'inscription. Veuillez réessayer.', 'error');
   }
 }

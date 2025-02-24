@@ -30,7 +30,6 @@ async function handleFormSubmit(form, app, view, successMessage, successSelector
       showStatusMessage(response.message, "error");
     }
   } catch (error) {
-    console.error(`Erreur lors de la requête vers ${app}/${view}:`, error);
     showStatusMessage(error.message || "Erreur lors de la soumission.", "error");
   }
 }
@@ -38,7 +37,7 @@ async function handleFormSubmit(form, app, view, successMessage, successSelector
 export function initializeaccountsManagementFormHandlers() {
   document.querySelectorAll('form').forEach((form) => {
     if (!form.hasAttribute('data-handled')) {
-      form.addEventListener('submit', async function (e) {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         switch (form.id) {
           case 'change-username-form':
@@ -50,9 +49,8 @@ export function initializeaccountsManagementFormHandlers() {
           case 'change-avatar-form':
             await handleFormSubmit(form, 'accounts', 'profile/update_avatar', 'Avatar mis à jour!', '#change-avatar-success');
             break;
-          // La suppression de compte est gérée via une modale et un module spécifique.
           default:
-            console.warn('Formulaire non reconnu:', form.id);
+            showStatusMessage(`Formulaire non reconnu: ${form.id}`, "warning");
         }
       });
       form.setAttribute('data-handled', 'true');

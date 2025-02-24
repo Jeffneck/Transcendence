@@ -1,4 +1,3 @@
-// static/js/2fa/enable2fa.js
 "use strict";
 
 import { navigateTo } from '/static/js/router.js';
@@ -17,7 +16,6 @@ async function loadEnable2FAView() {
       return false;
     }
   } catch (error) {
-    console.error('Erreur lors du chargement de la vue 2FA:', error);
     showStatusMessage('Impossible de charger la vue d\'activation de la 2FA.', 'error');
     throw error;
   }
@@ -38,7 +36,6 @@ async function verification2FA(event) {
       showStatusMessage(response.message || 'Code 2FA incorrect.', 'error');
     }
   } catch (error) {
-    console.error('Erreur lors de la vérification 2FA:', error);
     showStatusMessage('Erreur lors de la vérification de la 2FA.', 'error');
   }
 }
@@ -47,9 +44,7 @@ function attach2FAVerificationEvent() {
   const verifyForm = document.getElementById('verify-2fa-form');
   if (verifyForm) {
     verifyForm.addEventListener('submit', verification2FA);
-    console.debug('Événement de vérification 2FA attaché.');
   } else {
-    console.error('Formulaire de vérification 2FA introuvable.');
     showStatusMessage('Formulaire de vérification introuvable.', 'error');
   }
 }
@@ -59,7 +54,6 @@ export async function handleEnable2FA() {
     const loaded = await loadEnable2FAView();
     if (!loaded) return;
   } catch (error) {
-    console.error('Erreur dans handleEnable2FA:', error);
     showStatusMessage('Erreur lors de l\'activation de la 2FA.', 'error');
   }
 }

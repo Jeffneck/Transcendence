@@ -3,20 +3,14 @@ import { requestPost } from '../../api/index.js';
 import { showStatusMessage } from '../../tools/index.js';
 
 async function addFriend(friendUsername) {
-  console.debug('addFriend:', friendUsername);
   const formData = new FormData();
   formData.append('friend_username', friendUsername);
-  try {
-    const response = await requestPost('accounts', 'friends/add', formData);
-    if (!response || response.status !== 'success') {
-      const errorMessage = response?.message || 'Erreur lors de l\'ajout de l\'ami.';
-      throw new Error(errorMessage);
-    }
-    return response;
-  } catch (error) {
-    console.error('Erreur dans addFriend:', error);
-    throw error;
+  const response = await requestPost('accounts', 'friends/add', formData);
+  if (!response || response.status !== 'success') {
+    const errorMessage = response?.message || 'Erreur lors de l\'ajout de l\'ami.';
+    throw new Error(errorMessage);
   }
+  return response;
 }
 
 export async function handleAddFriend(e) {

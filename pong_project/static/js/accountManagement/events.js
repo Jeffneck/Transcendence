@@ -1,43 +1,38 @@
 "use strict";
-import { clearSessionAndUI, showStatusMessage } from '../tools/index.js';
+import { showStatusMessage } from '../tools/index.js';
 import { requestPost } from '../api/index.js';
 import { navigateTo } from '../router.js';
 
 async function handleLanguageChange(language) {
   try {
     const formData = new FormData();
-    console.debug("Changement de langue vers :", language);
     formData.append('language', language);
     const data = await requestPost('accounts', 'set_language', formData);
     if (data.status === 'success') {
       location.reload(); // Recharge la page pour appliquer la langue
     } else {
-      console.error("Erreur lors du changement de langue :", data.message);
+      showStatusMessage(`Erreur lors du changement de langue : ${data.message}`, 'error');
     }
   } catch (error) {
-    console.error("Erreur handleLanguageChange :", error);
+    showStatusMessage("Une erreur est survenue lors du changement de langue. Veuillez réessayer.", 'error');
+    // Vous pouvez également logger l'erreur en interne si nécessaire
   }
 }
 
 export function attachProfileEvents() {
-  // Bouton Activer 2FA
-  const enable2FABtn = document.querySelector('#enable-2fa-btn');
-  if (enable2FABtn && !enable2FABtn.dataset.bound) {
-    enable2FABtn.addEventListener('click', () => navigateTo('/enable-2fa'));
-    enable2FABtn.dataset.bound = true;
-  }
-  // Bouton Désactiver 2FA
-  const disable2FABtn = document.querySelector('#disable-2fa-btn');
-  if (disable2FABtn && !disable2FABtn.dataset.bound) {
-    disable2FABtn.addEventListener('click', () => navigateTo('/disable-2fa'));
-    disable2FABtn.dataset.bound = true;
-  }
-  // Bouton Supprimer le compte
-  const deleteAccountBtn = document.querySelector('#delete-account-btn');
-  if (deleteAccountBtn && !deleteAccountBtn.dataset.bound) {
-    deleteAccountBtn.addEventListener('click', () => navigateTo('/delete-account'));
-    deleteAccountBtn.dataset.bound = true;
-  }
+  const bindEvent = (selector, callback) => {
+    const element = document.querySelector(selector);
+    if (element && !element.dataset.bound) {
+      element.addEventListener('click', callback);
+      element.dataset.bound = true;
+    }
+  };
+
+  // Boutons de navigation
+  bindEvent('#enable-2fa-btn', () => navigateTo('/enable-2fa'));
+  bindEvent('#disable-2fa-btn', () => navigateTo('/disable-2fa'));
+  bindEvent('#delete-account-btn', () => navigateTo('/delete-account'));
+
   // Boutons de langue
   document.querySelectorAll('button[data-lang]').forEach((button) => {
     if (!button.dataset.bound) {

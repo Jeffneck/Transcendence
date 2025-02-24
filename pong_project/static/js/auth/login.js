@@ -32,10 +32,8 @@ async function submitLogin(form) {
   const formData = new FormData(form);
   try {
     const response = await requestPost('accounts', 'submit_login', formData);
-    console.debug('Response from submit_login:', response);
     return response;
   } catch (error) {
-    console.error('Erreur lors de la connexion :', error);
     showStatusMessage('Erreur lors de la connexion. Veuillez réessayer.', 'error');
     return null;
   } finally {
@@ -64,7 +62,6 @@ async function initializeLoginForm() {
       navigateTo('/home');
       return;
     }
-    console.error('Erreur dans initializeLoginForm :', error);
     showStatusMessage('Impossible de charger la vue de connexion. Veuillez réessayer.', 'error');
   }
 }
@@ -73,7 +70,6 @@ export async function handleLogin() {
   try {
     await initializeLoginForm();
   } catch (error) {
-    console.error('Erreur dans handleLogin :', error);
     showStatusMessage("Erreur lors de l'initialisation de la connexion.", 'error');
   }
 }
