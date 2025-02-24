@@ -221,3 +221,12 @@ async def notify_game_finished(game_id, tournament_id, winner, looser):
             'looser': looser_serializable
         }
     )
+
+async def notify_game_aborted(game_id):
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(
+        f"pong_{game_id}",
+        {
+            'type': 'game_aborted',
+        }
+    )

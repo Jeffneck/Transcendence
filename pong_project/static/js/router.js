@@ -36,12 +36,25 @@ export function initializeRouter() {
       handleFriendProfile(friendUsername);
     })
     .notFound(() => { initializeNotFoundView(); });
+
+  // Intercepter "Page Précédente" 
+  window.addEventListener("popstate", () => {
+    stopCurrentActions()
+    router.resolve();
+  });
+
   router.resolve();
 }
 
 export function navigateTo(route) {
     console.log(`Navigation vers ${route}`);
-    console.log(` websocket state ${window.currentGameSocket}`);
+    stopCurrentActions()
+    router.navigate(route);
+}
+
+
+function stopCurrentActions(){
+  console.log(` stopCurrentActions : websocket state ${window.currentGameSocket}`);
 
     //IMPROVE (peut etre qu'il faut gerer cela ailleurs que dans le router) systeme qui arrete l'attente de l'acceptation d'une game invitation quand on change de route
     //fermer le socket si une session de jeu est en cours 
@@ -52,6 +65,4 @@ export function navigateTo(route) {
     window.currentGameSocket = null;
     //si on etait dans une boucle de tournoi, on bloque l' affichage des pages suivantes
     window.stopTournamentFlow = true;
-
-    router.navigate(route);
 }

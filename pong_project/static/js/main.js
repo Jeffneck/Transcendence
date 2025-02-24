@@ -4,6 +4,11 @@ import { loadPongAnimation } from './modules/groundAnimation.js';
 import { adjustBurgerHeight, adjustSinNavHeight, adjustAllContainers, adjustContainerIfExists } from './modules/animations.js';
 import { initializeRouter } from './router.js';
 
+window.addEventListener('popstate', function(event) {
+  console.log("Retour en arrière détecté !");
+  // Ajoute ici le code pour gérer l'événement
+});
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.debug('DOMContentLoaded');

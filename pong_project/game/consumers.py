@@ -191,5 +191,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
         print(f"[PongConsumer] Broadcast collision_event for game_id={self.game_id}")
 
+    async def game_aborted(self, event):
+        await self.send(json.dumps({
+            'type': 'game_aborted',
+        }))
+        print(f"[PongConsumer] game_aborted for game_id={self.game_id}")
+
 
 # [IMPROVE] adapter le consummer  aux notifications envoyees par broadcast.py

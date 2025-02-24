@@ -11,7 +11,7 @@ import { navigateTo } from "../router.js";
 export async function createGameOnline() {
     
     if (typeof localStorage !== "undefined" && !localStorage.getItem('access_token')) {
-		navigateTo('/');
+		navigateTo('/game-options');
 		return;
 	}
     let onlineParams = sessionStorage.getItem('params');
@@ -211,12 +211,12 @@ async function joinOnlineGameAsLeft(game_id){
             const statusResponse = await requestGet('game', `get_game_status/${game_id}`);
             if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
                 showStatusMessage('Un des joueurs s\'est deconnecte, partie annulee ...', 'error');
-                navigateTo('/');
+                navigateTo('/game-options');
                 return;
             }
             if (statusResponse.status === 'error' ) {
                 showStatusMessage('Vous avez ete deconnecte de la partie en ligne', 'error');
-                navigateTo('/');
+                navigateTo('/game-options');
                 return;
             }
             await showResults(game_id);
@@ -233,6 +233,100 @@ async function joinOnlineGameAsLeft(game_id){
     }
     
 }
+
+async function joinOnlineGameAsRight(game_id){
+    try {
+        const tactile = isTouchDevice();
+        
+        // Créez un FormData et ajoutez le paramètre is_touch
+        const formData = new FormData();
+        formData.append('is_touch', tactile);
+
+        // Construit l'URL sans query string
+        const url = `join_online_game_as_right/${game_id}`;
+
+        const response = await requestPost('game', url, formData);
+        if (response.status === 'success') {
+
+            updateHtmlContent('#content', response.html);
+            
+            await launchLiveGameWithOptions(game_id, 'right', `start_online_game/${game_id}`); // Boucle de jeu
+            
+            // Ajout d'une pause de 1 seconde
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const statusResponse = await requestGet('game', `get_game_status/${game_id}`);
+            if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
+                showStatusMessage('Un des joueurs s\'est deconnecte, partie annulee ...', 'error');
+                navigateTo('/game-options');
+                return;
+            }
+            if (statusResponse.status === 'error' ) {
+                showStatusMessage('Vous avez ete deconnecte de la partie en ligne', 'error');
+                navigateTo('/game-options');
+                return;
+            }
+            await showResults(game_id);
+        } else {
+            showStatusMessage(response.message, 'error');
+        }
+    } catch (error) {
+        if (error instanceof HTTPError) {
+            showStatusMessage(error.message, 'error');
+        } else {
+            showStatusMessage('Une erreur est survenue.', 'error');
+        }
+        console.error('Erreur joinOnlineGameAsRight :', error);
+    }
+    
+}
+
+
+// async function joinOnlineGameAsRight(gameId) {
+//     try {
+//         const tactile = isTouchDevice();
+//         //console.log('tactile :', tactile);
+        
+//         // Créez un FormData et ajoutez le paramètre is_touch
+//         const formData = new FormData();
+//         formData.append('is_touch', tactile);
+//         const url = `join_online_game_as_right/${gameId}`;  // Assurez-vous d'avoir le slash final si nécessaire
+
+//         // Récupérer les données pour rejoindre la partie
+//         const response = await requestPost('game', url, formData);
+
+//         // Gestion des erreurs renvoyées par le serveur
+//         if (response.status === 'error') {
+//             console.error("Erreur lors de la tentative de rejoindre le jeu :", response.message);
+//             showStatusMessage(response.message, 'error');
+//             return;
+//         }
+//         // Si succès, afficher la page de jeu 
+//         updateHtmlContent('#content', response.html);
+
+//         await launchLiveGameWithOptions(gameId, 'right', `start_online_game/${gameId}`);
+
+//         await new Promise(resolve => setTimeout(resolve, 1000));
+//         // on vérifie le status côté serveur avant de continuer la loop
+//         const statusResponse = await requestGet('game', `get_game_status/${gameId}`);
+//         if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
+//             showStatusMessage('Un des joueurs s\'est deconnecte, partie annulee ...', 'error');
+//             navigateTo('/game-options');
+//             return ;
+//         }
+//         if (statusResponse.status === 'error' ) {
+//             showStatusMessage('Vous avez ete deconnecte de la partie en ligne', 'error');
+//             navigateTo('/game-options');
+//             return ;
+//         }
+//         await showResults(gameId);
+
+
+//     } catch (error) {
+//         console.error('Erreur réseau lors de la connexion au jeu en tant que joueur Right:', error);
+//         showStatusMessage('Une erreur réseau est survenue. Veuillez réessayer.', 'error');
+//     }
+// }
 
 
 export async function acceptGameInvitation(invitationId, action) {
@@ -265,51 +359,6 @@ export async function acceptGameInvitation(invitationId, action) {
 }
 
 
-async function joinOnlineGameAsRight(gameId) {
-    try {
-        const tactile = isTouchDevice();
-        //console.log('tactile :', tactile);
-        
-        // Créez un FormData et ajoutez le paramètre is_touch
-        const formData = new FormData();
-        formData.append('is_touch', tactile);
-        const url = `join_online_game_as_left/${gameId}`;  // Assurez-vous d'avoir le slash final si nécessaire
-
-        // Récupérer les données pour rejoindre la partie
-        const response = await requestPost('game', url, formData);
-
-        // Gestion des erreurs renvoyées par le serveur
-        if (response.status === 'error') {
-            console.error("Erreur lors de la tentative de rejoindre le jeu :", response.message);
-            showStatusMessage(response.message, 'error');
-            return;
-        }
-        // Si succès, afficher la page de jeu 
-        updateHtmlContent('#content', response.html);
-
-        await launchLiveGameWithOptions(gameId, 'right', `start_online_game/${gameId}`);
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // on vérifie le status côté serveur avant de continuer la loop
-        const statusResponse = await requestGet('game', `get_game_status/${gameId}`);
-        if (statusResponse.status === 'success' && statusResponse.session_status === 'cancelled') {
-            showStatusMessage('Un des joueurs s\'est deconnecte, partie annulee ...', 'error');
-            navigateTo('/');
-            return ;
-        }
-        if (statusResponse.status === 'error' ) {
-            showStatusMessage('Vous avez ete deconnecte de la partie en ligne', 'error');
-            navigateTo('/');
-            return ;
-        }
-        await showResults(gameId);
-
-
-    } catch (error) {
-        console.error('Erreur réseau lors de la connexion au jeu en tant que joueur Right:', error);
-        showStatusMessage('Une erreur réseau est survenue. Veuillez réessayer.', 'error');
-    }
-}
 
 export async function declineGameInvitation(invitationId) {
     try {

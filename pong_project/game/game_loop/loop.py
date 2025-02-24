@@ -21,7 +21,7 @@ from .collisions import (
 from .score_utils import handle_score, winner_detected, finish_game, reset_all_objects
 from .bumpers_utils import handle_bumpers_spawn, handle_bumper_expiration
 from .powerups_utils import handle_powerups_spawn, handle_powerup_expiration
-from .broadcast import broadcast_game_state, notify_countdown, notify_scored
+from .broadcast import broadcast_game_state, notify_countdown, notify_scored, notify_game_aborted
 
 class WaitForPlayersTimeout(Exception):
     """Exception levée lorsqu'un délai d'attente est dépassé avant que les joueurs ne soient prêts."""
@@ -140,12 +140,14 @@ async def game_loop(game_id):
                 await asyncio.sleep(dt)
             except asyncio.CancelledError:
                 await set_gameSession_status(game_id, "cancelled")
+                await notify_game_aborted(game_id)
                 return
 
     except asyncio.CancelledError:
         print(f"[game_loop] => CANCELLED => on arrête la game {game_id}")
         # Vous pouvez forcer le statut "cancelled" si ce n’est pas déjà fait
         await set_gameSession_status(game_id, "cancelled")
+        await notify_game_aborted(game_id)
         return  # On sort de la fonction
     
     except Exception as e:
