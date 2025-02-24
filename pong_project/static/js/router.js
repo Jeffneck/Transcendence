@@ -1,6 +1,6 @@
 "use strict";
 import { initializeHomeView } from './landing/coreHome.js';
-import { handleLogin, initializeRegisterView, initializeLogin2FAView, handleDisable2FA, handleEnable2FA } from './auth/index.js';
+import { handleLogin, initializeRegisterView, initializeLogin2FAView, handleDisable2FA, handleEnable2FA, handleDeleteAccount } from './auth/index.js';
 import {  initializeGameHomeView, handleGameMenu, createGameOnline, handleTournament } from './game/index.js';
 import { handleAccountsManagement } from './accountManagement/index.js';
 import { handleViewProfile } from './userProfile/index.js';
@@ -23,6 +23,7 @@ export function initializeRouter() {
     .on('/register', () => { initializeRegisterView(); })
     .on('/enable-2fa', () => { handleEnable2FA(); })
     .on('/disable-2fa', () => { handleDisable2FA(); })
+    .on('/delete-account', () => { handleDeleteAccount(); })
     .on('/home', () => { initializeGameHomeView(); })
     .on('/account', () => { handleAccountsManagement(); })
     .on('/profile', () => { handleViewProfile(); })
