@@ -12,14 +12,12 @@ logger = logging.getLogger(__name__)
 class JWTAuthenticationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        # Chemins à exclure du traitement JWT (exemple : connexion 2FA)
+
         self.exempt_paths = [
             '/accounts/2fa/login2fa/',
-            # Ajouter d'autres URL si nécessaire.
         ]
 
     def __call__(self, request):
-        # Si le chemin est exempté, on ne traite pas le JWT
         if any(request.path.startswith(exempt) for exempt in self.exempt_paths):
             return self.get_response(request)
 

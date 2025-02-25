@@ -8,7 +8,6 @@ from .models_utils import is_online_gameSession, set_gameSession_status, create_
 
 from .powerups_utils import handle_powerups_spawn, delete_powerup_redis
 from .bumpers_utils import handle_bumpers_spawn, delete_bumper_redis
-# transformer en parametre ajustable GameParameters?
 WIN_SCORE = 3 
 
 

@@ -7,12 +7,12 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from game.manager import set_global_loop
-import game.routing  # Assure-toi que ce chemin est correct
+import game.routing 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pong_project.settings')
 django.setup()
 
-# Définir le gestionnaire de lifespan
+
 class LifespanHandler:
     async def __call__(self, scope, receive, send):
         if scope['type'] != 'lifespan':
@@ -21,7 +21,7 @@ class LifespanHandler:
         while True:
             event = await receive()
             if event['type'] == 'lifespan.startup':
-                # Récupérer l'event loop en cours
+
                 loop = asyncio.get_running_loop()
                 set_global_loop(loop)
                 print("[LifespanHandler] Event loop set as global loop.")

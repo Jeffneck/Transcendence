@@ -3,7 +3,7 @@ services:
     build: ./nginx
     container_name: pong_nginx
     ports:
-      - "8081:80"
+      - "8080:80"
       - "8443:443"
     volumes:
       - ./static:/static

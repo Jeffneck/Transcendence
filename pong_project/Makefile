@@ -5,7 +5,7 @@ COMPOSE_FILE = docker-compose.yml
 .PHONY: up
 up:
 	@echo "Démarrage des conteneurs..."
-	@docker compose -f $(COMPOSE_FILE) up -d
+	@docker compose -f $(COMPOSE_FILE) up -d --build
 
 .PHONY: stop
 stop:
@@ -34,6 +34,13 @@ prune:
 	@docker volume prune --force
 	@docker network prune --force
 
+
+.PHONY: db-shell
+db-shell:
+	@echo "Visualiser les tables avec : \dt;"
+	@echo "Montrer la tables des utilisateurs avec : SELECT * FROM accounts_customuser"
+	@docker compose -f $(COMPOSE_FILE) exec db psql -U postgres -d pong_db
+
 .PHONY: reset
 reset: clean build up
 	@echo "Containers et volumes supprimés, images reconstruites, environnement prêt !"
@@ -42,4 +49,4 @@ reset: clean build up
 re:
 	@echo "Redémarrage complet des conteneurs..."
 	@docker compose -f $(COMPOSE_FILE) down --volumes --remove-orphans
-	@docker compose -f $(COMPOSE_FILE) up -d
+	@docker compose -f $(COMPOSE_FILE) up --build -d

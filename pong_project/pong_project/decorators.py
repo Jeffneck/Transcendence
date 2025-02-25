@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from functools import wraps
-from django.utils.translation import gettext as _ # Import pour la traduction
+from django.utils.translation import gettext as _ 
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def user_not_authenticated(view_func):
 
 
 def login_required_json(view_func):
-    # logger.debug("Entering login_required_json()")
+
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -24,7 +24,7 @@ def login_required_json(view_func):
                 'status': 'error',
                 'message': _('Utilisateur non authentifié'),
                 "error_code": "forbidden",
-                'redirect': '/' # l'URL souhaitée
+                'redirect': '/' 
             }, status=401)
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -38,8 +38,8 @@ def auth_partial_required(view_func):
     """
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if not request.session.get('auth_partial', False):  # Valeur par défaut à False
-            # logger.debug("Utilisateur non authentifié partiellement")
+        if not request.session.get('auth_partial', False):  
+
             return JsonResponse({
                 'status': 'error',
                 'message': _('Authentification partielle requise.'),
